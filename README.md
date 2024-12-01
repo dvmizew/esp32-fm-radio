@@ -37,8 +37,8 @@ TODO
 - 1x TEA5767 FM Radio Module
 - 1x SSD1306 OLED Screen Board
 - Multiple cables
-- 1x Button
-- 1x Joystick
+- 1x Button (play/pause)
+- 1x Joystick (volume control and menu navigation)
 
 ## Software Design
 For this project I used PlatformIO IDE.
@@ -47,7 +47,8 @@ The code is written in C++ and uses the Arduino framework.
 ### Libraries
 - TEA5767 for FM radio
 - Adafruit SSD1306 for OLED display control
-- Adafruit GFX for the OLED display graphics
+- Adafruit GFX for graphics
+- LVGL for GUI design (follow this [instructions](https://docs.lvgl.io/8.3/get-started/platforms/arduino.html#configure-lvgl))
 - ESP32-A2DP for Bluetooth audio
 - arduino-audio-tools for audio processing
 - ArduinoJson for parsing JSON data from the internet
