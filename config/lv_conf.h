@@ -266,9 +266,35 @@
 
 #endif
 
+/*====================
+   DISPLAY SETTINGS
+ *====================*/
+
+/* Maximal horizontal and vertical resolution to support by the library.*/
+#define LV_HOR_RES_MAX 128
+#define LV_VER_RES_MAX 64
+
 /*=======================
  * FEATURE CONFIGURATION
  *=======================*/
+
+/* Enable the use of animations */
+#define LV_USE_ANIMATION        1
+
+/* Enable the use of shadows */
+#define LV_USE_SHADOW           1
+
+/* Enable the use of anti-aliasing */
+#define LV_USE_ANTIALIAS        1
+
+/* Enable the use of GPU interface */
+#define LV_USE_GPU              1
+
+/* Enable the use of file system (required by images) */
+#define LV_USE_FILESYSTEM       1
+
+/* Enable the use of user data */
+#define LV_USE_USER_DATA        1
 
 /*-------------
  * Logging
