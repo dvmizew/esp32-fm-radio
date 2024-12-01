@@ -30,7 +30,7 @@ I want to learn and create something I can use at home. Hopefully, others will a
 - Audio Equalizer settings
 - System debug information (RAM, CPU, etc.)
 
-# Block Diagram
+## Block Diagram
 TODO
 ## Hardware Design
 - 1x Espressiff ESP-WROOM-32 with ESP32 Chip
