@@ -13,8 +13,9 @@ I want to learn and create something I can use at home. Hopefully, others will a
 1. Core functionality
 - FM Radio player
 - Play audio through Bluetooth speakers
-- Use as an external Bluetooth speaker
+- Use as an external Bluetooth speaker / Wi-Fi Speaker
 - Support for internet radio stations
+- Support for Spotify Connect
 - Audio Equalizer
 
 2. GUI
@@ -29,6 +30,7 @@ I want to learn and create something I can use at home. Hopefully, others will a
 - Bluetooth settings and status
 - Audio Equalizer settings
 - System debug information (RAM, CPU, etc.)
+- Web interface for remote control
 
 ## Block Diagram
 TODO
@@ -44,8 +46,9 @@ TODO
 For this project I used PlatformIO IDE.
 <br>
 The code is written in C++ and uses the Arduino framework.
+
 ### Libraries
-- TEA5767 for FM radio
+- TEA5767 library for FM radio
 - Adafruit SSD1306 for OLED display control
 - Adafruit GFX for graphics
 - LVGL for GUI design (follow this [instructions](https://docs.lvgl.io/8.3/get-started/platforms/arduino.html#configure-lvgl))
