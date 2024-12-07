@@ -5,5 +5,10 @@
 
 void initDisplay();
 void updateDisplay();
+void printWiFiNetworks();
+void printWiFiConnectionStatus();
+void printWeatherInfo();
+void printRDSInfo();
+void printBluetoothConnectionStatus();
 
 #endif

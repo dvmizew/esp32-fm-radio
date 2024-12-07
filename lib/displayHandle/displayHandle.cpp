@@ -1,6 +1,7 @@
 #include <Adafruit_SSD1306.h>
 #include "displayHandle.h"
 #include "radioHandle.h"
+#include "hardware.h"
 
 Adafruit_SSD1306 display(128, 64, &Wire);
 
@@ -39,4 +40,24 @@ void updateDisplay() {
         lastVolume = volume;
         lastFrequency = frequency;
     }
+}
+
+void printWiFiNetworks() {
+    // TODO
+}
+
+void printWiFiConnectionStatus() {
+    // TODO
+}
+
+void printWeatherInfo() {
+    // TODO
+}
+
+void printRDSInfo() {
+    // TODO
+}
+
+void printBluetoothConnectionStatus() {
+    // TODO
 }
