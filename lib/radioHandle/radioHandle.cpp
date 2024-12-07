@@ -7,6 +7,9 @@ char currentStation[16] = "87.5 FM";
 float frequency = 87.5;
 int volume = 0;
 
+unsigned long lastSeekTime = 0;
+unsigned long seekDelay = 1000;
+
 void initRadio() {
     radio.init();
     radio.setFrequency(87.5);
@@ -40,10 +43,30 @@ void adjustVolume(bool increase) {
 }
 
 void handleRadioControl() {
-    if (digitalRead(JOYSTICK_Y) == LOW) {
+    // volume control
+    static unsigned long lastVolumeChange = 0;
+    if (digitalRead(JOYSTICK_Y) == LOW && (millis() - lastVolumeChange > debounceDelay)) {
+        lastVolumeChange = millis();
         if (digitalRead(JOYSTICK_X) == HIGH)
-            adjustVolume(true);
+            adjustVolume(true);  // Increase volume
         else
-            adjustVolume(false);
+            adjustVolume(false);  // Decrease volume
+    }
+
+    // frequency control
+    static unsigned long lastFrequencyChange = 0;
+    if (digitalRead(JOYSTICK_X) == LOW && (millis() - lastFrequencyChange > debounceDelay)) {
+        lastFrequencyChange = millis();
+        if (digitalRead(JOYSTICK_Y) == HIGH)
+            tuneRadio(frequency + 0.1);  // increase frequency
+        else
+            tuneRadio(frequency - 0.1);  // decrease frequency
+    }
+
+    // seek up
+    if (digitalRead(JOYSTICK_SW) == LOW && (millis() - lastSeekTime > seekDelay)) {
+        radio.seekUp();
+        lastSeekTime = millis();
+        updateDisplay();
     }
 }
