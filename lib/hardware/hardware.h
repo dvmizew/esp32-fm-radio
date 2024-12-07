@@ -27,7 +27,7 @@
 
 void setupHardware();
 void showAvailableWiFiNetworks();
-void connectToWifi();
+void connectToWifi(const char *ssid, const char *password);
 void handleJoystickInput();
 
 #endif
