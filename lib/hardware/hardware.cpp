@@ -32,7 +32,7 @@ void handleJoystickInput() {
         }
 
         if (digitalRead(BUTTON_PLAY) == LOW) {
-            bluetoothSpeaker();
+            initializeBluetoothSpeaker();
         }
     }
 }
