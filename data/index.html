@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Radioinatorul</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Radioinatorul</h1>
+        <p>Current station: <span id="frequency">87.5</span> MHz</p>
+        <div class="buttons">
+            <button onclick="location.href='/change_station?increase=true'">+0.1 MHz</button>
+            <button onclick="location.href='/change_station?increase=false'">-0.1 MHz</button>
+        </div>
+        <p>Volume: <span id="volume">5</span></p>
+        <div class="buttons">
+            <button onclick="location.href='/adjust_volume?increase=true'">Volume +</button>
+            <button onclick="location.href='/adjust_volume?increase=false'">Volume -</button>
+        </div>
+        <div class="links">
+            <p><a href="/rds">View RDS Info</a></p>
+            <p><a href="/weather">View Weather</a></p>
+            <p><a href="/connect">Connect to Internet Radio</a></p>
+        </div>
+    </div>
+</body>
+</html>
