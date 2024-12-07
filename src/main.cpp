@@ -18,5 +18,5 @@ void setup() {
 void loop() {
     handleJoystickInput();
     handleRadioControl();
-    playThroughSpeaker();
+    playThroughBluetoothSpeaker();
 }
