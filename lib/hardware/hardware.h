@@ -18,6 +18,13 @@
 #define DISPLAY_SDA_PIN 21
 #define DISPLAY_SCL_PIN 22
 
+// MAX98357A amplifier pins
+#define AMP_SCK 14
+#define AMP_MISO 12
+#define AMP_MOSI 13
+#define AMP_CS 15
+#define AMP_SDA 26
+
 void setupHardware();
 void showAvailableWiFiNetworks();
 void connectToWifi();
