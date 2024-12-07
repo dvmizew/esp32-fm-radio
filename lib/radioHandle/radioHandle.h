@@ -6,7 +6,9 @@
 #define MAXVOLUME 10
 
 extern int volume;
-extern String currentStation;
+extern char currentStation[16];
+extern float frequency;
+
 void initRadio();
 void tuneRadio(float frequency);
 void handleRadioControl();

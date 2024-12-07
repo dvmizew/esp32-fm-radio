@@ -4,6 +4,8 @@
 #include <Arduino.h>
 #include <Wire.h>
 
+#define debounceDelay 50
+
 // pin definitions
 #define BUTTON_PLAY 33
 

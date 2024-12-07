@@ -16,18 +16,23 @@ void connectToWifi() {
     // TODO
 }
 
+unsigned long lastDebounceTime = 0;
+
 void handleJoystickInput() {
-    static float frequency = 87.5;
+    unsigned long currentTime = millis();
 
-    if (digitalRead(JOYSTICK_SW) == LOW) {
-        frequency += 0.1;
-        if (frequency > 108.0) frequency = 87.5;
-        tuneRadio(frequency);
-        delay(300);
-    }
+    if (currentTime - lastDebounceTime > debounceDelay) {
+        lastDebounceTime = currentTime;
+        
+        if (digitalRead(JOYSTICK_SW) == LOW) {
+            frequency += 0.1;
+            if (frequency > 108.0) 
+                frequency = 87.5;
+            tuneRadio(frequency);
+        }
 
-    if (digitalRead(BUTTON_PLAY) == LOW) {
-        playAudioViaBluetooth();
-        delay(300);
+        if (digitalRead(BUTTON_PLAY) == LOW) {
+            bluetoothSpeaker();
+        }
     }
 }

@@ -3,7 +3,8 @@
 #include "hardware.h"
 
 TEA5767 radio;
-String currentStation = "87.5 FM";
+char currentStation[16] = "87.5 FM";
+float frequency = 87.5;
 int volume = 0;
 
 void initRadio() {
@@ -12,31 +13,37 @@ void initRadio() {
 }
 
 void tuneRadio(float frequency) {
-    if (frequency >= 87.5 && frequency <= 108.0) {  // TEA5767 frequency range
+    if (frequency >= 87.5 && frequency <= 108.0) {
         radio.setFrequency(frequency);
-        currentStation = String(frequency) + " FM";
+        snprintf(currentStation, sizeof(currentStation), "%.1f FM", frequency);
         updateDisplay();
     } else {
-        Serial.println("Invalid frequency!");
+        Serial.println(F("Invalid frequency!"));
     }
+}
+
+void adjustVolume(bool increase) {
+    if (increase) {
+        volume++;
+        Serial.print(F("Volume: "));
+        Serial.println(volume);
+        if (volume > MAXVOLUME) 
+            volume = MAXVOLUME;
+    } 
+    else {
+        if (volume > 0) 
+            Serial.print(F("Volume: "));
+            Serial.println(volume);
+            volume--;
+    }
+    updateDisplay();
 }
 
 void handleRadioControl() {
     if (digitalRead(JOYSTICK_Y) == LOW) {
-        Serial.println("Joystick button pressed!");
-        if (digitalRead(JOYSTICK_X) == HIGH) {
-            volume++;
-            if (volume > MAXVOLUME) 
-                volume = MAXVOLUME;
-            Serial.print("Volume increased: ");
-            Serial.println(volume);
-        } 
-        else { 
-            if (volume > 0) 
-                volume--;
-            Serial.print("Volume decreased: ");
-            Serial.println(volume);
-        }
-        updateDisplay();
+        if (digitalRead(JOYSTICK_X) == HIGH)
+            adjustVolume(true);
+        else
+            adjustVolume(false);
     }
 }
