@@ -4,7 +4,7 @@
 #include "hardware.h"
 
 void setupBluetooth();
-void bluetoothSpeaker();
-void playThroughSpeaker();
+void initializeBluetoothSpeaker();
+void playThroughBluetoothSpeaker();
 
 #endif
