@@ -1,9 +1,9 @@
 #ifndef RADIO_H
 #define RADIO_H
 
-#include <TEA5767.h>
-#include <displayHandle.h>
-#include <hardware.h>
+#include "displayHandle.h"
+
+#define MAXVOLUME 10
 
 extern int volume;
 extern String currentStation;

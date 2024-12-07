@@ -8,3 +8,16 @@ void setupWebServer() {
     });
     server.begin();
 }
+
+void getRDSInfo(AsyncWebServerRequest *request) {
+    // get channel name and song details
+    // TODO
+}
+
+void getWeatherInfo(AsyncWebServerRequest *request) {
+    // TODO
+}
+
+void connectToInternetRadioStation(AsyncWebServerRequest *request) {
+    // TODO
+}

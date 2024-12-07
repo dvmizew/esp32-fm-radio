@@ -1,7 +1,7 @@
 #ifndef BLUETOOTH_H
 #define BLUETOOTH_H
 
-#include <hardware.h>
+#include "hardware.h"
 
 void setupBluetooth();
 void playAudioViaBluetooth();

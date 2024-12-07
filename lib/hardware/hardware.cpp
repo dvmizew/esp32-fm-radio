@@ -1,9 +1,19 @@
 #include "hardware.h"
+#include "radioHandle.h"
+#include "bluetooth.h"
 
 void setupHardware() {
     pinMode(BUTTON_PLAY, INPUT_PULLUP);
     pinMode(JOYSTICK_SW, INPUT_PULLUP);
-    Wire.begin(SDA_PIN, SCL_PIN);
+    Wire.begin(DISPLAY_SDA_PIN, DISPLAY_SCL_PIN);
+}
+
+void showAvailableWiFiNetworks() {
+    // TODO
+}
+
+void connectToWifi() {
+    // TODO
 }
 
 void handleJoystickInput() {
