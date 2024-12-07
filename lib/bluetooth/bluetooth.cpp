@@ -7,10 +7,10 @@ void setupBluetooth() {
     btAudio.start("ESP32 Radio");
 }
 
-void playAudioViaBluetooth() {
+void bluetoothSpeaker() {
     // TODO
 }
 
-void handleBluetoothAudio() {
+void playThroughSpeaker() {
     // TODO
 }
