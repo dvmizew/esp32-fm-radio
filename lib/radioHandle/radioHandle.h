@@ -12,5 +12,6 @@ extern float frequency;
 void initRadio();
 void tuneRadio(float frequency);
 void handleRadioControl();
+void adjustVolume(bool increase);
 
 #endif

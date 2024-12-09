@@ -2,7 +2,7 @@
 #include "radioHandle.h"
 #include "hardware.h"
 
-TEA5767 radio;
+extern TEA5767 radio;
 char currentStation[16] = "87.5 FM";
 float frequency = 87.5;
 int volume = 0;
@@ -11,15 +11,16 @@ unsigned long lastSeekTime = 0;
 unsigned long seekDelay = 1000;
 
 void initRadio() {
-    radio.init();
-    radio.setFrequency(87.5);
+    radio.init();  // Initialize the radio with the I2C bus
+    radio.setFrequency(frequency);  // Set initial frequency to 87.5 FM
+    Serial.println(F("Radio initialized!"));
 }
 
-void tuneRadio(float frequency) {
-    if (frequency >= 87.5 && frequency <= 108.0) {
-        radio.setFrequency(frequency);
-        snprintf(currentStation, sizeof(currentStation), "%.1f FM", frequency);
-        updateDisplay();
+void tuneRadio(float freq) {
+    if (freq >= 87.5 && freq <= 108.0) {
+        radio.setFrequency(freq);  // Set the radio to the desired frequency
+        snprintf(currentStation, sizeof(currentStation), "%.1f FM", freq);
+        updateDisplay();  // Update the OLED display with the current station
     } else {
         Serial.println(F("Invalid frequency!"));
     }
