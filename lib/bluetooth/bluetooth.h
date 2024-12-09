@@ -3,7 +3,6 @@
 
 #include "hardware.h"
 
-void setupBluetooth();
 void initializeBluetoothSpeaker();
 void playThroughBluetoothSpeaker();
 

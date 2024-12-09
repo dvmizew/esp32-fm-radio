@@ -2,12 +2,6 @@
 #include <BluetoothA2DPSource.h> // for transmitting audio and metadata to A2DP sink
 #include <BluetoothA2DPSink.h> // for receiving audio and metadata from A2DP source
 
-BluetoothA2DPSource btAudioSource; // for transmitting audio
-
-void setupBluetooth() {
-    btAudioSource.start("ESP32 Radio");
-}
-
 void initializeBluetoothSpeaker() {
     // this function makes ESP32 an A2DP sink (Bluetooth speaker)
     I2SStream i2s; // I2S Stream to write audio data to I2S bus
@@ -44,4 +38,5 @@ void initializeBluetoothSpeaker() {
 void playThroughBluetoothSpeaker() {
     // this function plays audio data through external Bluetooth speaker
     // TODO
+    BluetoothA2DPSource btAudioSource; // Bluetooth Source to write audio data to A2DP sink
 }

@@ -1,10 +1,15 @@
 #include <Adafruit_SSD1306.h>
+#include <Wire.h>
 #include "displayHandle.h"
-#include "radioHandle.h"
 #include "hardware.h"
 
+TwoWire I2C_display = TwoWire(1); // we use I2C1 for the display
+Adafruit_SSD1306 display(128, 64, &I2C_display);
+
 void initDisplay() {
+    I2C_display.begin(DISPLAY_SDA_PIN, DISPLAY_SCL_PIN, 400000); // initialize I2C bus with pins and frequency
     if (!display.begin(SSD1306_SWITCHCAPVCC, SSD1306_I2C_ADDRESS)) {
+        // if display initialization fails, print error message and stop execution
         Serial.println(F("Error initializing display!"));
         while (true);
     }
@@ -14,30 +19,11 @@ void initDisplay() {
     display.setTextColor(SSD1306_WHITE);
 }
 
-void updateDisplay() {
-    static char lastStation[16] = "";
-    static int lastVolume = -1;
-    static float lastFrequency = 87.5;
-
-    if (strcmp(currentStation, lastStation) != 0 || volume != lastVolume || frequency != lastFrequency) {
-        display.clearDisplay();
-        display.setCursor(0, 0);
-        display.println(F("Radio ESP32"));
-        display.setCursor(0, 16);
-        display.println(F("Station: "));
-        display.println(currentStation);
-        display.setCursor(0, 32);
-        display.print(F("Vol: "));
-        display.println(volume);
-        display.setCursor(0, 48);
-        display.print(F("Freq: "));
-        display.println(frequency, 1);
-        display.display();
-
-        strcpy(lastStation, currentStation);
-        lastVolume = volume;
-        lastFrequency = frequency;
-    }
+void printCustomMessage(const char *message) {
+    display.clearDisplay();
+    display.setCursor(0, 0);
+    display.println(message);
+    display.display();
 }
 
 void printWiFiNetworks() {

@@ -59,6 +59,22 @@ void showAvailableWiFiNetworks() {
     WiFi.scanDelete(); // free memory used by scan results
 }
 
+void saveWifiCredentials(const char *ssid, const char *password) {
+    // TODO
+}
+
+void loadWifiCredentials(char *ssid, char *password) {
+    // TODO
+}
+
+void deleteWifiCredentials() {
+    // TODO
+}
+
+void connectToSavedWifi() {
+    // TODO
+}
+
 void connectToWifi(const char *ssid, const char *password) {
     WiFi.begin(ssid, password);
     Serial.println("Connecting to WiFi...");

@@ -1,12 +1,6 @@
 #ifndef HARDWARE_H
 #define HARDWARE_H
 
-#include <Arduino.h>
-#include <Wire.h>
-#include <Adafruit_SSD1306.h>
-
-#define debounceDelay 50
-
 // pin definitions
 #define BUTTON_PLAY 0 // inca nu e definit
 
@@ -18,6 +12,7 @@
 // OLED display pins
 #define DISPLAY_SDA_PIN 21
 #define DISPLAY_SCL_PIN 22
+#define SSD1306_I2C_ADDRESS 0x3C
 
 // MAX98357A amplifier pins
 #define AMP_SCK 13 // Clock
@@ -29,13 +24,5 @@
 // TEA5767 radio pins
 #define TEA5767_SDA 17
 #define TEA5767_SCL 16
-
-extern TwoWire I2C_display;
-extern Adafruit_SSD1306 display;
-
-void setupHardware();
-void showAvailableWiFiNetworks();
-void connectToWifi(const char *ssid, const char *password);
-void handleJoystickInput();
 
 #endif
