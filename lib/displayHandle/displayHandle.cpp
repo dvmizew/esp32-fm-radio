@@ -3,8 +3,6 @@
 #include "radioHandle.h"
 #include "hardware.h"
 
-Adafruit_SSD1306 display(128, 64, &Wire);
-
 void initDisplay() {
     if (!display.begin(SSD1306_SWITCHCAPVCC, SSD1306_I2C_ADDRESS)) {
         Serial.println(F("Error initializing display!"));
