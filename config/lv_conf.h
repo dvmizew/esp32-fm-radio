@@ -274,6 +274,16 @@
 #define LV_HOR_RES_MAX 128
 #define LV_VER_RES_MAX 64
 
+/*========================
+ * BUFFER SETTINGS
+ *========================*/
+
+/* Use a buffer for drawing.
+ * It can be used to draw on a memory area and send it to the display later.
+ * Useful if the display has a slow interface (e.g. SPI) */
+
+#define LV_USE_DRAW_BUF         1
+
 /*=======================
  * FEATURE CONFIGURATION
  *=======================*/
