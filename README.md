@@ -35,7 +35,7 @@ I want to learn and create something I can use at home. Hopefully, others will a
 ## Block Diagram
 TODO
 ## Hardware Design
-- 1x Espressiff ESP-WROOM-32 with ESP32 Chip (if your device doesn't get recognized [instructions] (https://www.silabs.com/developer-tools/usb-to-uart-bridge-vcp-drivers))
+- 1x Espressiff ESP-WROOM-32 with ESP32 Chip
 - 1x TEA5767 FM Radio Module
 - 1x SSD1306 OLED Screen Board
 - Multiple cables
