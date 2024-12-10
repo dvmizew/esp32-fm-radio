@@ -19,7 +19,7 @@
 // #define AMP_MISO 12
 // #define AMP_MOSI 11
 #define AMP_CS 12 // Chip select
-#define AMP_SDA 39 // SN
+#define AMP_SDA 25
 
 // TEA5767 radio pins
 #define TEA5767_SDA 17
