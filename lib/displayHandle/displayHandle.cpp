@@ -1,47 +1,58 @@
-#include <Adafruit_SSD1306.h>
-#include <Wire.h>
 #include "displayHandle.h"
-#include "hardware.h"
+// #include "hardware.h"
 
-TwoWire I2C_display = TwoWire(1); // we use I2C1 for the display
-Adafruit_SSD1306 display(128, 64, &I2C_display);
+DisplayHandle::DisplayHandle()
+    : I2C_display(1), // I2C bus 1
+      display(128, 64, &I2C_display), // 128x64 display
+      displayInitialized(false) {} // we init the display in the main program
 
-void initDisplay() {
-    I2C_display.begin(DISPLAY_SDA_PIN, DISPLAY_SCL_PIN, 400000); // initialize I2C bus with pins and frequency
+void DisplayHandle::initDisplay() {
+    I2C_display.begin(DISPLAY_SDA_PIN, DISPLAY_SCL_PIN, 400000); // start I2C bus with SDA and SCL pins
     if (!display.begin(SSD1306_SWITCHCAPVCC, SSD1306_I2C_ADDRESS)) {
-        // if display initialization fails, print error message and stop execution
         Serial.println(F("Error initializing display!"));
-        while (true);
+        while(true);
     }
-    
-    display.clearDisplay();
+
+    display.clearDisplay(); // clear display buffer
     display.setTextSize(1);
     display.setTextColor(SSD1306_WHITE);
+    displayInitialized = true;
 }
 
-void printCustomMessage(const char *message) {
-    display.clearDisplay();
+void DisplayHandle::printCustomMessage(const char *message) {
+    clearAndUpdate();
     display.setCursor(0, 0);
     display.println(message);
     display.display();
 }
 
-void printWiFiNetworks() {
+// print methods from other modules
+void DisplayHandle::printWiFiNetworks() {
     // TODO
 }
 
-void printWiFiConnectionStatus() {
+void DisplayHandle::printWiFiConnectionStatus() {
     // TODO
 }
 
-void printWeatherInfo() {
+void DisplayHandle::printWeatherInfo() {
     // TODO
 }
 
-void printRDSInfo() {
+void DisplayHandle::printRDSInfo() {
     // TODO
 }
 
-void printBluetoothConnectionStatus() {
+void DisplayHandle::printBluetoothConnectionStatus() {
     // TODO
+}
+
+// status getter for display
+bool DisplayHandle::isDisplayInitialized() const {
+    return displayInitialized;
+}
+
+void DisplayHandle::clearAndUpdate() {
+    display.clearDisplay();
+    display.setCursor(0, 0);
 }
