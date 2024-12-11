@@ -1,7 +1,4 @@
 #include "wifiHandle.h"
-// #include <EEPROM.h>
-// #include <WiFi.h>
-// #include <cstring>
 
 WiFiHandle::WiFiHandle() {
     // initialize saved credentials with empty strings
@@ -119,6 +116,7 @@ bool WiFiHandle::isConnected() const {
     return WiFi.status() == WL_CONNECTED;
 }
 
+// getters
 void WiFiHandle::getIPAddress(char* ipBuffer, size_t bufferSize) const {
     if (isConnected()) {
         String ip = WiFi.localIP().toString(); // get local IP address
@@ -128,10 +126,46 @@ void WiFiHandle::getIPAddress(char* ipBuffer, size_t bufferSize) const {
         strncpy(ipBuffer, "Not connected", bufferSize - 1);
         ipBuffer[bufferSize - 1] = '\0';
     }
+    Serial.println(ipBuffer);
+}
+
+void WiFiHandle::getGatewayIP(char* ipBuffer, size_t bufferSize) const {
+    if (isConnected()) {
+        String ip = WiFi.gatewayIP().toString(); // get gateway IP address
+        strncpy(ipBuffer, ip.c_str(), bufferSize - 1); // copy IP address to buffer
+        ipBuffer[bufferSize - 1] = '\0';
+    } else {
+        strncpy(ipBuffer, "Not connected", bufferSize - 1);
+        ipBuffer[bufferSize - 1] = '\0';
+    }
+    Serial.println(ipBuffer);
 }
 
 void WiFiHandle::getMACAddress(char* macBuffer, size_t bufferSize) const {
     String mac = WiFi.macAddress(); // get MAC address
     strncpy(macBuffer, mac.c_str(), bufferSize - 1);
     macBuffer[bufferSize - 1] = '\0';
+}
+
+void WiFiHandle::getSSID(char* ssidBuffer, size_t bufferSize) const {
+    if (isConnected()) {
+        String ssid = WiFi.SSID(); // get SSID
+        strncpy(ssidBuffer, ssid.c_str(), bufferSize - 1);
+        ssidBuffer[bufferSize - 1] = '\0';
+    } else {
+        strncpy(ssidBuffer, "Not connected", bufferSize - 1);
+        ssidBuffer[bufferSize - 1] = '\0';
+    }
+    Serial.println(ssidBuffer);
+}
+
+void WiFiHandle::getRSSI(char* rssiBuffer, size_t bufferSize) const {
+    if (isConnected()) {
+        int rssi = WiFi.RSSI(); // get signal strength (RSSI)
+        snprintf(rssiBuffer, bufferSize, "%d dBm", rssi);
+    } else {
+        strncpy(rssiBuffer, "Not connected", bufferSize - 1);
+        rssiBuffer[bufferSize - 1] = '\0';
+    }
+    Serial.println(rssiBuffer);
 }

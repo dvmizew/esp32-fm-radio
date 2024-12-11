@@ -17,8 +17,13 @@ public:
     void loadCredentials(char* ssid, size_t ssidSize, char* password, size_t passwordSize); // load Wi-Fi credentials from EEPROM
     void deleteCredentials(const char* ssid, const char* password); // delete saved Wi-Fi credentials from EEPROM
     bool isConnected() const;
+
+    // getters
     void getIPAddress(char* ipBuffer, size_t bufferSize) const;
     void getMACAddress(char* macBuffer, size_t bufferSize) const;
+    void getSSID(char* ssidBuffer, size_t bufferSize) const;
+    void getRSSI(char* rssiBuffer, size_t bufferSize) const;
+    void getGatewayIP(char* ipBuffer, size_t bufferSize) const;
 
 private:
     char savedSSID[33];
