@@ -3,7 +3,12 @@
 
 #include <Adafruit_SSD1306.h>
 #include <Wire.h>
-#include "hardware.h"
+#include <time.h>
+#include <esp_system.h> // for system information
+#include <SPIFFS.h> // for SPIFFS information
+#include "hardware.h" // for display pins
+#include "wifiHandle.h" // for printing wifi networks
+#include "bluetooth.h" // for printing bluetooth connection status
 
 class DisplayHandle {
 public:
@@ -11,6 +16,10 @@ public:
     
     void initDisplay(); // initialize display with default settings
     void printCustomMessage(const char *message);
+
+    void printSystemInfo();
+    void printSPIFFSInfo();
+    void printDateTime();
 
     // print methods from other modules
     void printWiFiNetworks();
