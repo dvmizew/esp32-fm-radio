@@ -1,4 +1,3 @@
-#include "SPIFFS.h"
 #include "webserver.h"
 
 AsyncWebServer server(80);
@@ -55,10 +54,60 @@ void getRDSInfo(AsyncWebServerRequest *request) {
     request->send(200, "text/plain", rdsInfo);
 }
 
+const char* apiKey = "WEATHER_API_KEY"; // your accuweather API key
+const char* cityName = "YOUR_CITY_NAME"; // the city name for which you want to get the weather
+const char* locationServerName = "http://dataservice.accuweather.com/locations/v1/cities/search";
+const char* weatherServerName = "http://dataservice.accuweather.com/currentconditions/v1/";
+
+String getLocationKey() {
+    HTTPClient http;
+    String serverPath = String(locationServerName) + "?apikey=" + apiKey + "&q=" + cityName;
+
+    http.begin(serverPath.c_str());
+    int httpResponseCode = http.GET();
+
+    if (httpResponseCode > 0) {
+        String payload = http.getString();
+        DynamicJsonDocument doc(1024);
+        deserializeJson(doc, payload);
+
+        String locationKey = doc[0]["Key"].as<String>();
+        http.end();
+        return locationKey;
+    } else {
+        http.end();
+        return "";
+    }
+}
+
 void getWeatherInfo(AsyncWebServerRequest *request) {
-    // get weather info from some API (OpenWeatherMap)
-    String weather = "Temperature: 22°C, Condition: Sunny";
-    request->send(200, "text/plain", weather);
+    String locationKey = getLocationKey();
+    if (locationKey == "") {
+        request->send(500, "text/plain", "Failed to retrieve location key");
+        return;
+    }
+
+    HTTPClient http;
+    String serverPath = String(weatherServerName) + locationKey + "?apikey=" + apiKey;
+
+    http.begin(serverPath.c_str());
+    int httpResponseCode = http.GET();
+
+    if (httpResponseCode > 0) {
+        String payload = http.getString();
+        DynamicJsonDocument doc(1024);
+        deserializeJson(doc, payload);
+
+        float temperature = doc[0]["Temperature"]["Metric"]["Value"];
+        const char* condition = doc[0]["WeatherText"];
+
+        String weather = "Temperature: " + String(temperature) + "°C, Condition: " + String(condition);
+        request->send(200, "text/plain", weather);
+    } else {
+        request->send(500, "text/plain", "Failed to retrieve weather information");
+    }
+
+    http.end();
 }
 
 void connectToInternetRadioStation(AsyncWebServerRequest *request) {
