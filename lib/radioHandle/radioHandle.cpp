@@ -1,7 +1,4 @@
-// #include <Wire.h>
-// #include <TEA5767.h>
 #include "radioHandle.h"
-#include "hardware.h"
 
 RadioHandle::RadioHandle() {
     // default values (lowest frequency that TEA5767 supports)
@@ -12,6 +9,7 @@ RadioHandle::RadioHandle() {
 void RadioHandle::setupRadio() {
     Wire.begin(TEA5767_SDA, TEA5767_SCL); // start I2C bus with radio pins
     Wire.setClock(100000); // radio clock
+    joystick.setupJoystick(); // for controlling the radio
 }
 
 void RadioHandle::initRadio() {
@@ -43,9 +41,51 @@ void RadioHandle::searchRadioStations() {
 }
 
 void RadioHandle::handleRadioControl() {
-    // TODO
+    // THIS FUNCTION DOESN'T WORK YET
+    joystick.readJoystick();
+    
+    int x, y, sw;
+    joystick.getJoystickValues(x, y, sw);
+    
+    if (sw == HIGH) {
+        // toggle mute
+        radio.setMute(!radio.getMute());
+    }
+
+    // prevent accidental tuning
+    const int deadZone = 100;
+
+    if (x < (512 - deadZone)) {
+        // tune down
+        if (frequency > 87.5) {
+            frequency -= 0.1;
+            tuneRadio(frequency);
+            Serial.println(F("Tuning down..."));
+            Serial.printf("Frequency: %.1f FM\n", frequency);
+        }
+    } else if (x > (512 + deadZone)) {
+        // tune up
+        if (frequency < 108.0) {
+            frequency += 0.1;
+            tuneRadio(frequency);
+            Serial.println(F("Tuning up..."));
+            Serial.printf("Frequency: %.1f FM\n", frequency);
+        }
+    }
 }
 
+int32_t get_sound_data(Frame *data, int32_t frameCount) {
+    // this function is supposed to get sound data from TEA5767 using I2S
+    // TODO
+    return frameCount;
+}
+
+void RadioHandle::passAudioToBluetooth() {
+    // this function is supposed to pass audio data from get_sound_data to the Bluetooth speaker
+    bluetoothRadioSource.start("Radio");
+}
+
+// getters
 const char* RadioHandle::getCurrentStation() const {
     return currentStation;
 }
