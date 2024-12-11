@@ -8,40 +8,55 @@ DisplayHandle displayHandle;
 WiFiHandle wifiHandle;
 RadioHandle radio;
 BluetoothHandle bluetooth;
+JoystickHandle joystick;
 
 void setup() {
     Serial.begin(115200);
     // Display testing
     displayHandle.initDisplay();
-    displayHandle.printCustomMessage("xpert production, cbx the family");
+    displayHandle.printCustomMessage("X-PERT Production\nCioc Music\nCBX the family\nAlex Botea\n"); // Splash screen
+    delay(2000);
+    displayHandle.printWiFiNetworks();
+    displayHandle.printSystemInfo();
 
     // Wi-Fi testing
     wifiHandle.scanNetworks();
-    wifiHandle.connect("ssid", "password");
+    // wifiHandle.connect("ssid", "password");
+    wifiHandle.saveCredentials("ssid", "password");
+    wifiHandle.connectToSaved();
 
-    if (wifiHandle.isConnected()) {
-        char ipAddress[16]; // buffer for IP address
-        wifiHandle.getIPAddress(ipAddress, sizeof(ipAddress)); // get IP address
-        Serial.print("IP Address: ");
-        Serial.println(ipAddress);
-    } else {
-        Serial.println("Wi-Fi not connected.");
-    }
+    char ipBuffer[16];
+    char gatewayBuffer[16];
+    char ssidBuffer[33];
+    char rssiBuffer[5];
+    wifiHandle.getIPAddress(ipBuffer, sizeof(ipBuffer));
+    wifiHandle.getGatewayIP(gatewayBuffer, sizeof(gatewayBuffer));
+    wifiHandle.getSSID(ssidBuffer, sizeof(ssidBuffer));
+    wifiHandle.getRSSI(rssiBuffer, sizeof(rssiBuffer));
 
-    // radio testing
+    Serial.print("IP Address: ");
+    Serial.println(ipBuffer);
+
+    Serial.print("Gateway IP: ");
+    Serial.println(gatewayBuffer);
+
+    Serial.print("SSID: ");
+    Serial.println(ssidBuffer);
+
+    Serial.print("RSSI: ");
+    Serial.println(rssiBuffer);
+
+    displayHandle.printDateTime();
+
+    // // radio testing
     radio.initRadio();
-    radio.tuneRadio(90.1);
-    Serial.print("Current Station: ");
-    Serial.println(radio.getCurrentStation());
-    Serial.print("Current Frequency: ");
-    Serial.println(radio.getFrequency());
+    // joystick.testJoystick();
+    // radio.handleRadioControl(); // THIS FUNCTION DOESN'T WORK YET
 
     // Bluetooth testing
     bluetooth.initializeBluetoothSpeaker();
     if (bluetooth.isConnected()) {
         Serial.println("Bluetooth connected.");
-    } else {
-        Serial.println("Bluetooth not connected.");
     }
 }
 
