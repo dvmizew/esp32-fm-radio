@@ -1,7 +1,4 @@
 #include "bluetooth.h"
-// #include <Wire.h>
-// #include <BluetoothA2DPSink.h>
-// #include <BluetoothA2DPSource.h>
 
 BluetoothHandle::BluetoothHandle() 
     : btAudioSink(i2s), 
@@ -41,15 +38,21 @@ void BluetoothHandle::initializeBluetoothSpeaker() {
 }
 
 void BluetoothHandle::playThroughBluetoothSpeaker() {
-    // TODO
+    // btAudioSource.start("Bluetoothinatorul");
+    // btAudioSource.write_data();
 }
 
+void BluetoothHandle::handleBluetoothControl() {
+   // TODO
+}
+
+// getters
 bool BluetoothHandle::isConnected() const {
     return connected;
 }
 
 const char* BluetoothHandle::getDeviceName() const {
-    return deviceName;
+    return deviceName; // return this device's name
 }
 
 void BluetoothHandle::connectionStateCallback(bool connected) {
