@@ -5,9 +5,9 @@
 #define BUTTON_PLAY 0 // inca nu e definit
 
 // joystick pins
-#define JOYSTICK_X 9 // SD2
-#define JOYSTICK_Y 10 // SD3
-#define JOYSTICK_SW 11 // CMD
+#define JOYSTICK_X 27
+#define JOYSTICK_Y 26
+#define JOYSTICK_SW 32
 
 // OLED display pins
 #define DISPLAY_SDA_PIN 21
