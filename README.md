@@ -36,8 +36,9 @@ I want to learn and create something I can use at home. Hopefully, others will a
 TODO
 ## Hardware Design
 - 1x Espressiff ESP-WROOM-32 with ESP32 Chip
-- 1x TEA5767 FM Radio Module
-- 1x SSD1306 OLED Screen Board
+- 1x TEA5767 FM Radio Module (3 V)
+- 1x SSD1306 OLED Screen Board (3 V)
+- 1x MAX98357A amplifier
 - Multiple cables
 - 1x Button (play/pause)
 - 1x Joystick (volume control and menu navigation)
