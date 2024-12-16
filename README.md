@@ -33,7 +33,6 @@ I want to learn and create something I can use at home. Hopefully, others will a
 - Web interface for remote control
 
 ## Block Diagram
-## Block Diagram
 ![Block Diagram](hardware/block_diagram.png)
 ## Electrical Schematic
 ![Electrical Schematic](hardware/electric_scheme.png)
