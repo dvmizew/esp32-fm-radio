@@ -17,6 +17,7 @@ public:
     void initDisplay(); // initialize display with default settings
     void printCustomMessage(const char *message);
 
+    void printResourceUsage();
     void printSystemInfo();
     void printSPIFFSInfo();
     void printDateTime();
@@ -27,6 +28,7 @@ public:
     void printWeatherInfo();
     void printRDSInfo();
     void printBluetoothConnectionStatus();
+    void printAudioInfo();
 
     // getter
     bool isDisplayInitialized() const;

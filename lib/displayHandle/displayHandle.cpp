@@ -44,6 +44,23 @@ void DisplayHandle::printDateTime() {
     display.display();
 }
 
+void DisplayHandle::printResourceUsage() {
+    // this function locks the device and doesn't allow other functions to run
+    clearAndUpdate();
+    display.setCursor(0, 0);
+
+    while (true) {
+        display.setCursor(0, 0);
+        display.printf("Free Heap: %d KB\n", ESP.getFreeHeap() / 1024);
+        if (ESP.getFreePsram() > 0) // check if PSRAM is available
+            display.printf("Free PSRAM: %d KB\n", ESP.getFreePsram() / 1024);
+        display.printf("CPU Freq: %d MHz\n", ESP.getCpuFreqMHz());
+        display.printf("Chip Temp: %f C\n", (double)temperatureRead());
+        display.display();
+        delay(1000);
+    }
+}
+
 void DisplayHandle::printSystemInfo() {
     clearAndUpdate();
     display.setCursor(0, 0);
@@ -166,6 +183,10 @@ void DisplayHandle::printBluetoothConnectionStatus() {
     }
 
     display.display();
+}
+
+void DisplayHandle::printAudioInfo() {
+    // TODO
 }
 
 // status getter for display
