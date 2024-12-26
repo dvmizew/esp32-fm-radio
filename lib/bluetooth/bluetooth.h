@@ -7,6 +7,7 @@
 #include <AudioTools.h>
 #include <BluetoothA2DPSink.h>
 #include <BluetoothA2DPSource.h>
+#include <Audio.h>
 
 class BluetoothHandle {
 public:
@@ -24,6 +25,7 @@ private:
     static void connectionStateCallback(bool connected); // callback for connection state
 
     bool connected;
+    Audio audio; // to play audio on MAX98357A amplifier
     BluetoothA2DPSink btAudioSink; // sink for bluetooth speaker output
     BluetoothA2DPSource btAudioSource; // source for bluetooth audio input
     I2SStream i2s;

@@ -7,15 +7,10 @@ BluetoothHandle::BluetoothHandle()
       deviceName("Bluetoothinatorul") {}
 
 void BluetoothHandle::initializeBluetoothSpeaker() {
-    // configure I2S for MAX98357A amplifier
-    auto config = i2s.defaultConfig(); // get default I2S configuration
-    config.pin_bck = AMP_SCK; // set BCK pin
-    config.pin_ws = AMP_CS; // set LRCK pin
-    config.pin_data = AMP_SDA; // set DATA pin
-
-    i2s.begin(config); // initialize I2S with configuration
     Serial.begin(115200);
-    Serial.println("I2S stream started");
+
+    audio.setPinout(AMP_BLCK, AMP_LRC, AMP_DIN);
+    audio.setVolume(100);
 
     // getting metadata from A2DP source
     btAudioSink.set_avrc_metadata_callback([](uint8_t id, const uint8_t *value) {
@@ -32,7 +27,9 @@ void BluetoothHandle::initializeBluetoothSpeaker() {
     });
 
     btAudioSink.set_avrc_connection_state_callback(BluetoothHandle::connectionStateCallback);
-
+    
+    // btAudioSink.set_auto_reconnect(true, 1000); // auto reconnect after 1 second
+    btAudioSink.set_pin_config(amp_config); // pin config for MAX98357A amplifier
     btAudioSink.start(deviceName); // start Bluetooth sink with device name
     Serial.println("Bluetoothinatorul is now discoverable");
 }
