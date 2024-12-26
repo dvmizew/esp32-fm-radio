@@ -3,12 +3,15 @@
 #include "radioHandle.h"
 #include "wifiHandle.h"
 #include "bluetooth.h"
+#include <spotify.h>
 
+// global objects for testing
 DisplayHandle displayHandle;
 WiFiHandle wifiHandle;
 RadioHandle radio;
 BluetoothHandle bluetooth;
 JoystickHandle joystick;
+SpotifyHandle spotify; // doesn't work yet
 
 void setup() {
     Serial.begin(115200);
@@ -48,8 +51,9 @@ void setup() {
 
     displayHandle.printDateTime();
 
-    // // radio testing
+    // radio testing
     radio.initRadio();
+    radio.tuneRadio(87.5);
     // joystick.testJoystick();
     // radio.handleRadioControl(); // THIS FUNCTION DOESN'T WORK YET
 
@@ -58,6 +62,11 @@ void setup() {
     if (bluetooth.isConnected()) {
         Serial.println("Bluetooth connected.");
     }
+
+    // displayHandle.printResourceUsage();
+    // Spotify testing
+    // spotify.setupSpotify();
+    // it doesn't work because at this point
 }
 
 void loop() {
