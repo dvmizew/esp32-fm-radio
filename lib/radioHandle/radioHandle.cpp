@@ -74,7 +74,7 @@ void RadioHandle::handleRadioControl() {
     }
 }
 
-int32_t get_sound_data(Frame *data, int32_t frameCount) {
+int32_t RadioHandle::get_sound_data(Frame *data, int32_t frameCount) {
     // this function is supposed to get sound data from TEA5767 using I2S
     // TODO
     return frameCount;
