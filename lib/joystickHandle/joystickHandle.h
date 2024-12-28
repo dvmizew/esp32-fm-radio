@@ -8,6 +8,8 @@ class JoystickHandle {
 
 public:
     JoystickHandle();
+    ~JoystickHandle() = default;
+    
     void setupJoystick();
     void readJoystick();
     void testJoystick();
