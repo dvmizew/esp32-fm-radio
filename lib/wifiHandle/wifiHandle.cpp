@@ -1,9 +1,13 @@
 #include "wifiHandle.h"
 
-WiFiHandle::WiFiHandle() {
-    // initialize saved credentials with empty strings
-    memset(savedSSID, 0, sizeof(savedSSID));
-    memset(savedPassword, 0, sizeof(savedPassword));
+WiFiHandle::WiFiHandle() : savedNetworksCount(0), nextID(1) {
+    // initialize saved networks with empty strings
+    for (int i = 0; i < MAX_NETWORKS; i++) {
+        savedNetworks[i].ID = 0;
+        memset(savedNetworks[i].ssid, 0, sizeof(savedNetworks[i].ssid));
+        memset(savedNetworks[i].password, 0, sizeof(savedNetworks[i].password));
+    }
+    Serial.println("WiFiHandle initialized");
 }
 
 void WiFiHandle::scanNetworks() {
@@ -64,52 +68,65 @@ void WiFiHandle::connect(const char* ssid, const char* password) {
 }
 
 void WiFiHandle::connectToSaved() {
-    // load saved credentials
-    if (strlen(savedSSID) > 0)
-        connect(savedSSID, savedPassword);
-    else
-        Serial.println("No saved Wi-Fi credentials.");
+    for (int i = 0; i < savedNetworksCount; i++) {
+        connect(savedNetworks[i].ssid, savedNetworks[i].password);
+        if (isConnected()) {
+            Serial.printf("Connected to saved network: %s\n", savedNetworks[i].ssid);
+            break;
+        }
+    }
 }
 
-void WiFiHandle::saveCredentials(const char* ssid, const char* password) {
-    strncpy(savedSSID, ssid, sizeof(savedSSID) - 1);
-    savedSSID[sizeof(savedSSID) - 1] = '\0';
-
-    strncpy(savedPassword, password, sizeof(savedPassword) - 1);
-    savedPassword[sizeof(savedPassword) - 1] = '\0';
-
-    EEPROM.begin(128); // begin EEPROM
-    EEPROM.put(0, savedSSID); // save credentials to EEPROM
-    EEPROM.put(64, savedPassword); // save credentials to EEPROM
-    EEPROM.commit(); // commit changes
-
-    Serial.println("Credentials saved.");
+void WiFiHandle::connectByID(int id) {
+    for (int i = 0; i < savedNetworksCount; i++) {
+        if (savedNetworks[i].ID == id) {
+            connect(savedNetworks[i].ssid, savedNetworks[i].password);
+            return;
+        }
+    }
+    Serial.println("Network ID not found.");
 }
 
-void WiFiHandle::loadCredentials(char* ssid, size_t ssidSize, char* password, size_t passwordSize) {
-    EEPROM.begin(128);
-    EEPROM.get(0, savedSSID);
-    EEPROM.get(64, savedPassword);
+void WiFiHandle::addCredentials(const char* ssid, const char* password) {
+    if (savedNetworksCount < MAX_NETWORKS) {
+        savedNetworks[savedNetworksCount].ID = nextID++;
+        strncpy(savedNetworks[savedNetworksCount].ssid, ssid, sizeof(savedNetworks[savedNetworksCount].ssid) - 1);
+        savedNetworks[savedNetworksCount].ssid[sizeof(savedNetworks[savedNetworksCount].ssid) - 1] = '\0';
 
-    strncpy(ssid, savedSSID, ssidSize - 1);
-    ssid[ssidSize - 1] = '\0';
+        strncpy(savedNetworks[savedNetworksCount].password, password, sizeof(savedNetworks[savedNetworksCount].password) - 1);
+        savedNetworks[savedNetworksCount].password[sizeof(savedNetworks[savedNetworksCount].password) - 1] = '\0';
 
-    strncpy(password, savedPassword, passwordSize - 1);
-    password[passwordSize - 1] = '\0';
-
-    Serial.println("Credentials loaded.");
+        savedNetworksCount++;
+        Serial.println("Credentials added.");
+    } else {
+        Serial.println("Maximum number of networks reached.");
+    }
 }
 
-void WiFiHandle::deleteCredentials(const char* ssid, const char* password) {
-    memset(savedSSID, 0, sizeof(savedSSID)); // clear saved credentials
-    memset(savedPassword, 0, sizeof(savedPassword)); // clear saved credentials
+void WiFiHandle::removeCredentials(const char* ssid) {
+    for (int i = 0; i < savedNetworksCount; i++) {
+        if (strcmp(savedNetworks[i].ssid, ssid) == 0) {
+            for (int j = i; j < savedNetworksCount - 1; j++) {
+                savedNetworks[j] = savedNetworks[j + 1];
+            }
+            savedNetworksCount--;
+            Serial.println("Credentials removed.");
+            return;
+        }
+    }
+    Serial.println("SSID not found.");
+}
 
-    EEPROM.begin(128); // begin EEPROM
-    EEPROM.put(0, savedSSID); // save empty credentials to EEPROM
-    EEPROM.put(64, savedPassword); // save empty credentials to EEPROM
-    EEPROM.commit(); // commit changes
+void WiFiHandle::listSavedCredentials() {
+    Serial.println("Saved Wi-Fi networks:");
+    for (int i = 0; i < savedNetworksCount; i++) {
+        Serial.printf("%d: %s (ID: %d)\n", i + 1, savedNetworks[i].ssid, savedNetworks[i].ID);
+    }
+}
 
-    Serial.println("Credentials deleted.");
+void WiFiHandle::clearCredentials() {
+    savedNetworksCount = 0;
+    Serial.println("All credentials cleared.");
 }
 
 bool WiFiHandle::isConnected() const {
