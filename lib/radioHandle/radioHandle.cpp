@@ -1,55 +1,80 @@
 #include "radioHandle.h"
 
 RadioHandle::RadioHandle() {
-    // default values (lowest frequency that TEA5767 supports)
-    snprintf(currentStation, sizeof(currentStation), "87.5 FM");
-    frequency = 87.5;
+    // default values (known radio station Europa FM (pe aceeasi frecventa cu tine))
+    snprintf(currentStation, sizeof(currentStation), "107.5 FM");
+    frequency = 107.5;
 }
 
 void RadioHandle::setupRadio() {
     Wire.begin(TEA5767_SDA, TEA5767_SCL); // start I2C bus with radio pins
-    Wire.setClock(100000); // radio clock
     joystick.setupJoystick(); // for controlling the radio
 }
 
 void RadioHandle::initRadio() {
     setupRadio();
-    radio.init();
-    radio.setFrequency(frequency);  // Set initial frequency to 87.5 FM
+    radio.setFrequency(frequency);  // set initial frequency to 107.5 FM
     Serial.println(F("Radio initialized!"));
     Serial.println(F("Current station:"));
     Serial.println(frequency);
 }
 
-void RadioHandle::tuneRadio(float freq) {
-    if (freq >= 87.5 && freq <= 108.0) {
-        radio.setFrequency(freq);  // Set the radio to the desired frequency
-        snprintf(currentStation, sizeof(currentStation), "%.1f FM", freq);
-    } else {
-        Serial.println(F("Invalid frequency!"));
+void RadioHandle::signalStrengthLED() {
+    pinMode(INTERNAL_LED, OUTPUT);
+    while (true) {
+        // this function lights up the LED based on the signal strength
+        int signalLevel = radio.getSignalLevel();
+        int brightness = 0;
+
+        if (signalLevel == 0) {
+            // no signal
+            brightness = 0;
+        } else if (signalLevel == 1) {
+            // weak signal
+            brightness = 128; // 50% brightness
+        } else {
+            // strong signal
+            brightness = 255; // 100% brightness
+        }
+        analogWrite(INTERNAL_LED, brightness);
+        delay(100);
     }
 }
 
 void RadioHandle::searchRadioStations() {
-    for (float i = 87.5; i <= 108.0; i += 0.1) {
-        radio.setFrequency(i);
-        Serial.print(F("Searching station at "));
-        Serial.print(i);
-        tuneRadio(i); // iterate through all frequencies
-        delay(1000);
+    int foundStations = radio.init(3);
+    int stationCount = 0;
+
+    Serial.println(F("Searching for radio stations..."));
+    for (int i = 0; i < foundStations && stationCount < MAX_RADIO_STATIONS; i++) {
+        float station = radio.nextStation();
+        if (station == 0.0) {
+            break;
+        }
+
+        stations[stationCount].frequency = station;
+        Serial.printf("Station %d: %.1f FM\n", stationCount + 1, station);
+        stationCount++;
+    }
+}
+
+void RadioHandle::printRadioStations() {
+    Serial.println(F("Radio stations:"));
+    for (int i = 0; i < MAX_RADIO_STATIONS; ++i) {
+        Serial.printf("Station %d: %.1f FM\n", i + 1, stations[i].frequency);
     }
 }
 
 void RadioHandle::handleRadioControl() {
     // THIS FUNCTION DOESN'T WORK YET
     joystick.readJoystick();
-    
+
     int x, y, sw;
     joystick.getJoystickValues(x, y, sw);
-    
+
     if (sw == HIGH) {
         // toggle mute
-        radio.setMute(!radio.getMute());
+        radio.setMuted(!radio.isMuted());
     }
 
     // prevent accidental tuning
@@ -57,20 +82,12 @@ void RadioHandle::handleRadioControl() {
 
     if (x < (512 - deadZone)) {
         // tune down
-        if (frequency > 87.5) {
-            frequency -= 0.1;
-            tuneRadio(frequency);
-            Serial.println(F("Tuning down..."));
-            Serial.printf("Frequency: %.1f FM\n", frequency);
-        }
+        Serial.println("Tuning down");
+        radio.previousStation();
     } else if (x > (512 + deadZone)) {
         // tune up
-        if (frequency < 108.0) {
-            frequency += 0.1;
-            tuneRadio(frequency);
-            Serial.println(F("Tuning up..."));
-            Serial.printf("Frequency: %.1f FM\n", frequency);
-        }
+        Serial.println("Tuning up");
+        radio.nextStation();
     }
 }
 
@@ -92,4 +109,8 @@ const char* RadioHandle::getCurrentStation() const {
 
 float RadioHandle::getFrequency() const {
     return frequency;
+}
+
+short RadioHandle::getSignalLevel() const {
+    return getSignalLevel();
 }
