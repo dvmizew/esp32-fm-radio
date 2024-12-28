@@ -6,7 +6,6 @@
 #include <driver/i2s.h>
 
 // pin definitions
-// #define BUTTON_PLAY 0
 #define INTERNAL_LED 2
 
 // joystick pins
@@ -33,6 +32,8 @@ extern i2s_pin_config_t amp_config;
 #define TEA5767_SDA 17
 #define TEA5767_SCL 16
 
+// function prototypes
+void blinkInternalLED();
 void printI2CDevices();
 
 #endif

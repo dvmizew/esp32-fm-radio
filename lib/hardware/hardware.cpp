@@ -22,6 +22,16 @@ i2s_pin_config_t amp_config = {
     .data_in_num = I2S_PIN_NO_CHANGE
 };
 
+void blinkInternalLED() {
+    pinMode(INTERNAL_LED, OUTPUT);
+    while (true) {
+        digitalWrite(INTERNAL_LED, HIGH);
+        delay(1000);
+        digitalWrite(INTERNAL_LED, LOW);
+        delay(1000);
+    }
+}
+
 void printI2CDevices() {
     Wire.begin();
     byte error, address;
