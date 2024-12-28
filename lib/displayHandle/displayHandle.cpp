@@ -21,27 +21,46 @@ void DisplayHandle::initDisplay() {
 void DisplayHandle::printCustomMessage(const char *message) {
     clearAndUpdate();
     display.setCursor(0, 0);
+    if (strlen(message) > 16) {
+        display.setTextSize(1);
+    } else {
+       display.setTextSize(2);
+    }
     display.println(message);
     display.display();
 }
 
 void DisplayHandle::printDateTime() {
-    clearAndUpdate();
-    display.setCursor(0, 0);
+    while (true) {
+        clearAndUpdate();
+        display.setCursor(0, 0);
+        
+        configTime(0, 0, "pool.ntp.org", "time.nist.gov"); // get time from NTP server
 
-    configTime(0, 0, "pool.ntp.org", "time.nist.gov"); // get time from NTP server
+        struct tm timeinfo;
+        if (!getLocalTime(&timeinfo)) {
+            display.println("Failed to obtain time\nPlease connect to \nWi-Fi");
+            display.display();
+            vTaskDelay(1000 / portTICK_PERIOD_MS); // 1 second delay
+            continue;
+        }
 
-    struct tm timeinfo;
-    if (!getLocalTime(&timeinfo)) {
-        display.println("Failed to obtain time\nPlease connect to Wi-Fi");
+        display.printf("Date: %02d.%02d.%04d\n", timeinfo.tm_mday, timeinfo.tm_mon + 1, timeinfo.tm_year + 1900);
+        display.printf("Time: %02d:%02d:%02d\n", timeinfo.tm_hour, timeinfo.tm_min, timeinfo.tm_sec);
+
         display.display();
-        return;
+        vTaskDelay(1000 / portTICK_PERIOD_MS); // 1 second delay
     }
+}
 
-    display.printf("Date: %02d.%02d.%04d\n", timeinfo.tm_mday, timeinfo.tm_mon + 1, timeinfo.tm_year + 1900);
-    display.printf("Time: %02d:%02d:%02d\n", timeinfo.tm_hour, timeinfo.tm_min, timeinfo.tm_sec);
+void DisplayHandle::printDateTimeTask(void *pvParameters) {
+    DisplayHandle *displayHandle = static_cast<DisplayHandle*>(pvParameters);
+    displayHandle->printDateTime();
+    vTaskDelete(NULL);
+}
 
-    display.display();
+void DisplayHandle::startPrintDateTimeTask() {
+    xTaskCreate(&DisplayHandle::printDateTimeTask, "DateTimeTask", 4096, this, 1, NULL);
 }
 
 void DisplayHandle::printResourceUsage() {
@@ -50,15 +69,27 @@ void DisplayHandle::printResourceUsage() {
     display.setCursor(0, 0);
 
     while (true) {
+        display.clearDisplay();
         display.setCursor(0, 0);
+        display.printf("RESOURCE USAGE\n\n");
         display.printf("Free Heap: %d KB\n", ESP.getFreeHeap() / 1024);
         if (ESP.getFreePsram() > 0) // check if PSRAM is available
             display.printf("Free PSRAM: %d KB\n", ESP.getFreePsram() / 1024);
         display.printf("CPU Freq: %d MHz\n", ESP.getCpuFreqMHz());
-        display.printf("Chip Temp: %f C\n", (double)temperatureRead());
+        display.printf("Chip Temp: %0.2f C\n", (double)temperatureRead());
         display.display();
-        delay(1000);
+        vTaskDelay(1000 / portTICK_PERIOD_MS); // 1 second delay
     }
+}
+
+void DisplayHandle::printResourceUsageTask(void *pvParameters) {
+    DisplayHandle *displayHandle = static_cast<DisplayHandle*>(pvParameters);
+    displayHandle->printResourceUsage();
+    vTaskDelete(NULL);
+}
+
+void DisplayHandle::startPrintResourceUsageTask() {
+    xTaskCreate(&DisplayHandle::printResourceUsageTask, "ResourceUsageTask", 4096, this, 1, NULL);
 }
 
 void DisplayHandle::printSystemInfo() {
@@ -67,9 +98,10 @@ void DisplayHandle::printSystemInfo() {
 
     display.printf("CPU Freq: %d MHz\n", ESP.getCpuFreqMHz());
     display.printf("Free Heap: %d KB\n", ESP.getFreeHeap() / 1024);
-    display.printf("Chip Model: %s\n", ESP.getChipModel());
+    display.printf("Chip Model: \n%s\n", ESP.getChipModel());
     display.printf("Chip Rev: %d\n", ESP.getChipRevision());
     display.printf("Flash Size: %d MB\n", ESP.getFlashChipSize() / (1024 * 1024));
+    display.printf("Flash Speed: %d MHz\n", ESP.getFlashChipSpeed() / 1000000);
 
     // MAC Address
     uint8_t mac[6];
@@ -157,6 +189,59 @@ void DisplayHandle::printWiFiConnectionStatus() {
     }
 
     display.display();
+}
+
+void DisplayHandle::printBluetoothInfo() {
+    clearAndUpdate();
+    display.setCursor(0, 0);
+
+    BluetoothHandle bluetoothHandle;
+    while (true) {
+        display.clearDisplay();
+        display.setCursor(0, 0);
+        display.println("Bluetooth Info");
+        display.printf("This Device: \n%s\n", bluetoothHandle.getDeviceName());
+        display.printf("Connected: %s\n", bluetoothHandle.isConnected() ? "Yes" : "No");
+
+        display.display();
+        vTaskDelay(1000 / portTICK_PERIOD_MS); // 1 second delay
+    }
+}
+
+void DisplayHandle::printBluetoothInfoTask(void *pvParameters) {
+    DisplayHandle *displayHandle = static_cast<DisplayHandle*>(pvParameters);
+    displayHandle->printBluetoothInfo();
+    vTaskDelete(NULL);
+}
+
+void DisplayHandle::startPrintBluetoothInfoTask() {
+    xTaskCreate(&DisplayHandle::printBluetoothInfoTask, "BluetoothInfoTask", 4096, this, 1, NULL);
+}
+
+void DisplayHandle::printRadioInfo() {
+    clearAndUpdate();
+    display.setCursor(0, 0);
+
+    RadioHandle radioHandle;
+    while (true) {
+        display.println("Radio Info");
+        display.printf("Station: %s\n", radioHandle.getCurrentStation());
+        display.printf("Frequency: %.1f FM\n", radioHandle.getFrequency());
+        display.printf("Signal Level: %d\n", radioHandle.getSignalLevel());
+
+        display.display();
+        vTaskDelay(1000 / portTICK_PERIOD_MS); // 1 second delay
+    }
+}
+
+void DisplayHandle::printRadioInfoTask(void *pvParameters) {
+    DisplayHandle *displayHandle = static_cast<DisplayHandle*>(pvParameters);
+    displayHandle->printRadioInfo();
+    vTaskDelete(NULL);
+}
+
+void DisplayHandle::startPrintRadioInfoTask() {
+    xTaskCreate(&DisplayHandle::printRadioInfoTask, "RadioInfoTask", 4096, this, 1, NULL);
 }
 
 void DisplayHandle::printWeatherInfo() {
