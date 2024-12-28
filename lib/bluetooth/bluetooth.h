@@ -12,6 +12,8 @@
 class BluetoothHandle {
 public:
     BluetoothHandle();
+    ~BluetoothHandle() = default;
+
     void initializeBluetoothSpeaker(); // ESP32 as A2DP sink (external speaker)
     void playThroughBluetoothSpeaker(); // play audio through other Bluetooth speaker
 
