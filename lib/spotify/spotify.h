@@ -6,6 +6,8 @@
 class SpotifyHandle {
 public:
     SpotifyHandle();
+    ~SpotifyHandle() = default;
+    
     void setupSpotify();
 
 private:
