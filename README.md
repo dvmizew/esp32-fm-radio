@@ -86,3 +86,4 @@ The code is written in C++ and uses the Arduino framework.
 - ESPASyncWebServer for handling web requests
 - SpotifyEsp32 for Spotify Connect
 - base64 for encoding and decoding data
+- freeRTOS for multitasking
