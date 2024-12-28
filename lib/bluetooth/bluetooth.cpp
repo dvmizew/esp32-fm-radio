@@ -14,6 +14,10 @@ void BluetoothHandle::initializeBluetoothSpeaker() {
 
     // getting metadata from A2DP source
     btAudioSink.set_avrc_metadata_callback([](uint8_t id, const uint8_t *value) {
+        if (value == nullptr || strlen((const char *)value) == 0) {
+            return;
+        }
+        
         if (id == ESP_AVRC_MD_ATTR_TITLE) { // title metadata
             Serial.print("Title: ");
             Serial.println((const char *)value);
@@ -22,6 +26,18 @@ void BluetoothHandle::initializeBluetoothSpeaker() {
             Serial.println((const char *)value);
         } else if (id == ESP_AVRC_MD_ATTR_ALBUM) { // album metadata
             Serial.print("Album: ");
+            Serial.println((const char *)value);
+        } else if (id == ESP_AVRC_MD_ATTR_NUM_TRACKS) { // number of tracks metadata
+            Serial.print("Number of tracks: ");
+            Serial.println((const char *)value);
+        } else if (id == ESP_AVRC_MD_ATTR_GENRE) { // genre metadata
+            Serial.print("Genre: ");
+            Serial.println((const char *)value);
+        } else if (id == ESP_AVRC_MD_ATTR_PLAYING_TIME) { // playing time metadata
+            Serial.print("Playing time: ");
+            Serial.println((const char *)value);
+        } else if (id == ESP_AVRC_MD_ATTR_TRACK_NUM) { // track number metadata
+            Serial.print("Track number: ");
             Serial.println((const char *)value);
         }
     });
@@ -53,9 +69,12 @@ const char* BluetoothHandle::getDeviceName() const {
 }
 
 void BluetoothHandle::connectionStateCallback(bool connected) {
+    pinMode(INTERNAL_LED, OUTPUT);
     if (connected) {
         Serial.println("Connected to A2DP source");
+        digitalWrite(INTERNAL_LED, HIGH);
     } else {
         Serial.println("Disconnected from A2DP source");
+        digitalWrite(INTERNAL_LED, LOW);
     }
 }
