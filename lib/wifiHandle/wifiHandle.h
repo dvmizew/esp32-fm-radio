@@ -3,44 +3,32 @@
 
 #include <Arduino.h>
 #include <WiFi.h>
-#include <cstring>
 
 #define MAX_NETWORKS 10 // maximum number of networks to store
+#define MAX_SSID_LEN 32 // maximum length of SSID
+#define MAX_PASS_LEN 64 // maximum length of password
 
 struct WiFiCredentials {
-    int ID;
-    char ssid[32];
-    char password[64];
+    uint8_t ID;
+    char ssid[MAX_SSID_LEN];
+    char password[MAX_PASS_LEN];
 };
 
-class WiFiHandle {
-public:
-    WiFiHandle();
-    ~WiFiHandle() = default;
+// STATION MODE
+void scanWiFiNetworks(); // scan for available Wi-Fi networks
+void connectToWiFiNetwork(const char* ssid, const char* password); // connect to a Wi-Fi network
+void printWiFiConnectionStatus(); // print Wi-Fi connection status
+void addWiFiCredentials(WiFiCredentials* savedNetworks, uint8_t* savedNetworksCount, uint8_t* nextID, const char* ssid, const char* password); // add Wi-Fi credentials to the array
+void removeWiFiCredentials(WiFiCredentials* savedNetworks, uint8_t* savedNetworksCount, const char* ssid); // remove Wi-Fi credentials from the array
+void printSavedWiFiCredentials(const WiFiCredentials* savedNetworks, uint8_t savedNetworksCount); // list all saved Wi-Fi credentials
+void clearAllWiFiCredentials(WiFiCredentials* savedNetworks, uint8_t* savedNetworksCount, uint8_t* nextID); // clear all saved Wi-Fi credentials
+bool isWiFiConnected(); // check if connected to Wi-Fi
 
-    void scanNetworks(); // scan for available Wi-Fi networks
-    void connect(const char* ssid, const char* password); // connect to a Wi-Fi network
-    void connectToSaved(); // connect to a saved Wi-Fi network
-    void connectByID(int id); // connect to a Wi-Fi network by ID
-    void addCredentials(const char* ssid, const char* password); // add Wi-Fi credentials to the array
-    void removeCredentials(const char* ssid); // remove Wi-Fi credentials from the array
-    void listSavedCredentials(); // list all saved Wi-Fi credentials
-    void clearCredentials(); // clear all saved Wi-Fi credentials
-    bool isConnected() const;
+// AP MODE
+void startAP(const char* ssid, const char* password); // start an access point
+void stopAP(); // stop the access point
+void printAPInfo(); // print access point information
+void printConnectedDevices(); // print connected devices to the access point
+int getDevicesCount(); // get the number of connected devices
 
-    // getters
-    void getIPAddress(char* ipBuffer, size_t bufferSize) const;
-    void getMACAddress(char* macBuffer, size_t bufferSize) const;
-    void getSSID(char* ssidBuffer, size_t bufferSize) const;
-    void getRSSI(char* rssiBuffer, size_t bufferSize) const;
-    void getGatewayIP(char* ipBuffer, size_t bufferSize) const;
-
-private:
-    WiFiCredentials savedNetworks[MAX_NETWORKS];
-    int savedNetworksCount;
-    int nextID;
-
-    void printNetworkInfo(int index) const;
-};
-
-#endif
+#endif // WIFIHANDLE_H
