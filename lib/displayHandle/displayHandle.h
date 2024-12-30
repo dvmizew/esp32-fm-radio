@@ -20,22 +20,22 @@ public:
 
     void initDisplay(); // initialize display with default settings
     void clearAndUpdate(); // clear display and set cursor to (0, 0)
-    void printCustomMessage(const char *message);
+    void displayCustomMessage(const char *message);
 
-    void printResourceUsage();
-    void printSystemInfo();
-    void printSPIFFSInfo();
-    void printDateTime();
+    void displayResourceUsage();
+    void displaySystemInfo();
+    void displaySPIFFSInfo();
+    void displayCurrentDateTime();
 
     // print methods from other modules
-    void printWiFiNetworks();
-    void printWiFiConnectionStatus();
-    void printBluetoothInfo();
-    void printRadioInfo();
-    void printWeatherInfo();
-    void printRDSInfo();
-    void printBluetoothConnectionStatus();
-    void printAudioInfo();
+    void displayWiFiNetworks();
+    void displayWiFiConnectionStatus();
+    void displayBluetoothInfo(BluetoothHandle &bluetoothObject);
+    void displayRadioInfo(RadioHandle &radioObject);
+    void displayWeatherInfo();
+    void displayRDSInfo();
+    void displayBluetoothConnectionStatus();
+    void displayAudioInfo();
 
     // tasks
     static void printResourceUsageTask(void *pvParameters);

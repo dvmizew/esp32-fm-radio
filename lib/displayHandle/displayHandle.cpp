@@ -18,7 +18,7 @@ void DisplayHandle::initDisplay() {
     displayInitialized = true;
 }
 
-void DisplayHandle::printCustomMessage(const char *message) {
+void DisplayHandle::displayCustomMessage(const char *message) {
     clearAndUpdate();
     display.setCursor(0, 0);
     if (strlen(message) > 16) {
@@ -30,7 +30,7 @@ void DisplayHandle::printCustomMessage(const char *message) {
     display.display();
 }
 
-void DisplayHandle::printDateTime() {
+void DisplayHandle::displayCurrentDateTime() {
     while (true) {
         clearAndUpdate();
         display.setCursor(0, 0);
@@ -39,7 +39,7 @@ void DisplayHandle::printDateTime() {
 
         struct tm timeinfo;
         if (!getLocalTime(&timeinfo)) {
-            display.println("Failed to obtain time\nPlease connect to \nWi-Fi");
+            display.println(F("Failed to obtain time\nPlease connect to \nWi-Fi"));
             display.display();
             vTaskDelay(1000 / portTICK_PERIOD_MS); // 1 second delay
             continue;
@@ -55,7 +55,7 @@ void DisplayHandle::printDateTime() {
 
 void DisplayHandle::printDateTimeTask(void *pvParameters) {
     DisplayHandle *displayHandle = static_cast<DisplayHandle*>(pvParameters);
-    displayHandle->printDateTime();
+    displayHandle->displayCurrentDateTime();
     vTaskDelete(NULL);
 }
 
@@ -63,19 +63,25 @@ void DisplayHandle::startPrintDateTimeTask() {
     xTaskCreate(&DisplayHandle::printDateTimeTask, "DateTimeTask", 4096, this, 1, NULL);
 }
 
-void DisplayHandle::printResourceUsage() {
+void DisplayHandle::displayResourceUsage() {
     // this function locks the device and doesn't allow other functions to run
     clearAndUpdate();
     display.setCursor(0, 0);
 
     while (true) {
+        if (!heap_caps_check_integrity_all(true)) {
+            Serial.println(F("Heap corruption detected!"));
+        }
+
         display.clearDisplay();
         display.setCursor(0, 0);
-        display.printf("RESOURCE USAGE\n\n");
+        display.println(F("RESOURCE USAGE\n"));
+        display.printf("Total heap: %d KB\n", ESP.getHeapSize() / 1024);
         display.printf("Free Heap: %d KB\n", ESP.getFreeHeap() / 1024);
+        display.printf("Total heap used:\n%d KB\n", ESP.getMaxAllocHeap() / 1024);
         if (ESP.getFreePsram() > 0) // check if PSRAM is available
             display.printf("Free PSRAM: %d KB\n", ESP.getFreePsram() / 1024);
-        display.printf("CPU Freq: %d MHz\n", ESP.getCpuFreqMHz());
+        display.printf("Free SPIFFS: %d KB\n", SPIFFS.totalBytes() / 1024 - SPIFFS.usedBytes() / 1024);
         display.printf("Chip Temp: %0.2f C\n", (double)temperatureRead());
         display.display();
         vTaskDelay(1000 / portTICK_PERIOD_MS); // 1 second delay
@@ -84,7 +90,7 @@ void DisplayHandle::printResourceUsage() {
 
 void DisplayHandle::printResourceUsageTask(void *pvParameters) {
     DisplayHandle *displayHandle = static_cast<DisplayHandle*>(pvParameters);
-    displayHandle->printResourceUsage();
+    displayHandle->displayResourceUsage();
     vTaskDelete(NULL);
 }
 
@@ -92,12 +98,12 @@ void DisplayHandle::startPrintResourceUsageTask() {
     xTaskCreate(&DisplayHandle::printResourceUsageTask, "ResourceUsageTask", 4096, this, 1, NULL);
 }
 
-void DisplayHandle::printSystemInfo() {
+void DisplayHandle::displaySystemInfo() {
     clearAndUpdate();
     display.setCursor(0, 0);
 
     display.printf("CPU Freq: %d MHz\n", ESP.getCpuFreqMHz());
-    display.printf("Free Heap: %d KB\n", ESP.getFreeHeap() / 1024);
+    display.printf("Total Heap: %d KB\n", ESP.getHeapSize() / 1024);
     display.printf("Chip Model: \n%s\n", ESP.getChipModel());
     display.printf("Chip Rev: %d\n", ESP.getChipRevision());
     display.printf("Flash Size: %d MB\n", ESP.getFlashChipSize() / (1024 * 1024));
@@ -111,7 +117,7 @@ void DisplayHandle::printSystemInfo() {
     display.display();
 }
 
-void DisplayHandle::printSPIFFSInfo() {
+void DisplayHandle::displaySPIFFSInfo() {
     clearAndUpdate();
     display.setCursor(0, 0);
 
@@ -128,56 +134,26 @@ void DisplayHandle::printSPIFFSInfo() {
 }
 
 // print methods from other modules
-void DisplayHandle::printWiFiNetworks() {
-    Serial.println("Printing Wi-Fi networks on display...");
-    printCustomMessage("Wi-Fi networks");
-    WiFiHandle wifiHandle;
-    int networkCount = WiFi.scanNetworks();
+void DisplayHandle::displayWiFiNetworks() {
     clearAndUpdate();
     display.setCursor(0, 0);
-    display.printf("Network count: %d\n", networkCount);
-    display.display();
-    delay(2000); // delay to show network count
 
-    for (int i = 0; i < networkCount; i++) {
-        clearAndUpdate();
-        display.setCursor(0, 0);
-
-        // numerotation
-        display.printf("%d/%d\n", i + 1, networkCount);
-
-        // SSID
-        display.printf("%-16.16s\n", WiFi.SSID(i).c_str());
-
-        // RSSI
-        display.printf("RSSI: %4d\n", WiFi.RSSI(i));
-
-        // channel
-        display.printf("CH: %2d\n", WiFi.channel(i));
-
-        // encryption type
-        display.printf("ENC: ");
-        switch (WiFi.encryptionType(i)) {
-            case WIFI_AUTH_OPEN: display.println("OPEN"); break;
-            case WIFI_AUTH_WEP: display.println("WEP"); break;
-            case WIFI_AUTH_WPA_PSK: display.println("WPA"); break;
-            case WIFI_AUTH_WPA2_PSK: display.println("WPA2"); break;
-            case WIFI_AUTH_WPA_WPA2_PSK: display.println("WPA+WPA2"); break;
-            case WIFI_AUTH_WPA2_ENTERPRISE: display.println("WPA2-EAP"); break;
-            default: display.println("UNKNOWN");
-        }
-
-        display.display();
-        delay(4000); // delay to show each network
+    int availableNetworkCount = WiFi.scanNetworks();
+    display.println("Wi-Fi Networks");
+    display.printf("Total: %d\n", availableNetworkCount);
+    for (int i = 0; i < availableNetworkCount; ++i) {
+        // Serial.printf("%d: %s (%d)\n", i + 1, WiFi.SSID(i).c_str(), WiFi.RSSI(i));
+        display.printf("%d: %s\n", i + 1, WiFi.SSID(i).c_str());
     }
+    display.display();
 }
 
-void DisplayHandle::printWiFiConnectionStatus() {
+void DisplayHandle::displayWiFiConnectionStatus() {
     clearAndUpdate();
     display.setCursor(0, 0);
 
-    if (WiFi.status() == WL_CONNECTED) {
-        display.println("Wi-Fi Connected");
+    if (isWiFiConnected()) {
+        display.println("Wi-Fi Connected\n");
 
         display.printf("SSID: %s\n", WiFi.SSID().c_str());
 
@@ -191,17 +167,17 @@ void DisplayHandle::printWiFiConnectionStatus() {
     display.display();
 }
 
-void DisplayHandle::printBluetoothInfo() {
+void DisplayHandle::displayBluetoothInfo(BluetoothHandle &bluetoothObject) {
     clearAndUpdate();
     display.setCursor(0, 0);
 
-    BluetoothHandle bluetoothHandle;
+    // BluetoothHandle bluetoothHandle;
     while (true) {
         display.clearDisplay();
         display.setCursor(0, 0);
         display.println("Bluetooth Info");
-        display.printf("This Device: \n%s\n", bluetoothHandle.getDeviceName());
-        display.printf("Connected: %s\n", bluetoothHandle.isConnected() ? "Yes" : "No");
+        display.printf("This Device: \n%s\n", bluetoothObject.getDeviceName());
+        display.printf("Connected: %s\n", bluetoothObject.isConnected() ? "Yes" : "No");
 
         display.display();
         vTaskDelay(1000 / portTICK_PERIOD_MS); // 1 second delay
@@ -210,7 +186,8 @@ void DisplayHandle::printBluetoothInfo() {
 
 void DisplayHandle::printBluetoothInfoTask(void *pvParameters) {
     DisplayHandle *displayHandle = static_cast<DisplayHandle*>(pvParameters);
-    displayHandle->printBluetoothInfo();
+    BluetoothHandle bluetoothObject;
+    displayHandle->displayBluetoothInfo(bluetoothObject);
     vTaskDelete(NULL);
 }
 
@@ -218,16 +195,16 @@ void DisplayHandle::startPrintBluetoothInfoTask() {
     xTaskCreate(&DisplayHandle::printBluetoothInfoTask, "BluetoothInfoTask", 4096, this, 1, NULL);
 }
 
-void DisplayHandle::printRadioInfo() {
+void DisplayHandle::displayRadioInfo(RadioHandle &radioObject) {
     clearAndUpdate();
     display.setCursor(0, 0);
 
-    RadioHandle radioHandle;
+    // RadioHandle radioHandle;
     while (true) {
         display.println("Radio Info");
-        display.printf("Station: %s\n", radioHandle.getCurrentStation());
-        display.printf("Frequency: %.1f FM\n", radioHandle.getFrequency());
-        display.printf("Signal Level: %d\n", radioHandle.getSignalLevel());
+        display.printf("Station: %s\n", radioObject.getCurrentStation());
+        display.printf("Frequency: %.1f FM\n", radioObject.getFrequency());
+        display.printf("Signal Level: %d\n", radioObject.getSignalLevel());
 
         display.display();
         vTaskDelay(1000 / portTICK_PERIOD_MS); // 1 second delay
@@ -236,7 +213,8 @@ void DisplayHandle::printRadioInfo() {
 
 void DisplayHandle::printRadioInfoTask(void *pvParameters) {
     DisplayHandle *displayHandle = static_cast<DisplayHandle*>(pvParameters);
-    displayHandle->printRadioInfo();
+    RadioHandle radioObject;
+    displayHandle->displayRadioInfo(radioObject);
     vTaskDelete(NULL);
 }
 
@@ -244,15 +222,15 @@ void DisplayHandle::startPrintRadioInfoTask() {
     xTaskCreate(&DisplayHandle::printRadioInfoTask, "RadioInfoTask", 4096, this, 1, NULL);
 }
 
-void DisplayHandle::printWeatherInfo() {
+void DisplayHandle::displayWeatherInfo() {
     // TODO
 }
 
-void DisplayHandle::printRDSInfo() {
+void DisplayHandle::displayRDSInfo() {
     // TODO
 }
 
-void DisplayHandle::printBluetoothConnectionStatus() {
+void DisplayHandle::displayBluetoothConnectionStatus() {
     clearAndUpdate();
     display.setCursor(0, 0);
 
@@ -270,7 +248,7 @@ void DisplayHandle::printBluetoothConnectionStatus() {
     display.display();
 }
 
-void DisplayHandle::printAudioInfo() {
+void DisplayHandle::displayAudioInfo() {
     // TODO
 }
 
