@@ -3,26 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Radioinatorul</title>
+    <title>ESP32inatorul</title>
     <link rel="stylesheet" href="style.css">
+    <script src="script.js"></script>
 </head>
 <body>
-    <div class="container">
-        <h1>Radioinatorul</h1>
-        <p>Current station: <span id="frequency">87.5</span> MHz</p>
-        <div class="buttons">
-            <button onclick="location.href='/change_station?increase=true'">+0.1 MHz</button>
-            <button onclick="location.href='/change_station?increase=false'">-0.1 MHz</button>
+    <div class="sidebar">
+        <h1>ESP32inatorul</h1>
+        <button class="dark-mode-toggle" onclick="toggleDarkMode()">Toggle Dark Mode</button>
+        <nav>
+            <ul>
+                <li><a href="#" onclick="showSection('radio-section')">Radio</a></li>
+                <li><a href="#" onclick="showSection('bluetooth-section')">Bluetooth</a></li>
+                <li><a href="#" onclick="showSection('settings-section')">Settings</a></li>
+            </ul>
+        </nav>
+    </div>
+    <div class="main-content">
+        <div id="radio-section" class="section">
+            <h2>Radio</h2>
+            <p>Current station: <span id="frequency">107.5</span> MHz</p>
+            <div class="buttons">
+                <button onclick="changeStation(true)">+0.1 MHz</button>
+                <button onclick="changeStation(false)">-0.1 MHz</button>
+            </div>
+            <p>Set Frequency: <input type="text" id="frequency-input" placeholder="Enter frequency"> MHz</p>
+            <button onclick="setFrequency()">Set Frequency</button>
+            <p>Volume: <span id="volume">5</span></p>
+            <div class="buttons">
+                <button onclick="adjustVolume(true)">Volume +</button>
+                <button onclick="adjustVolume(false)">Volume -</button>
+            </div>
+            <h3>Romanian Stations</h3>
+            <div class="buttons">
+                <button onclick="setStationFrequency(88.0)">Radio România Actualități</button>
+                <button onclick="setStationFrequency(89.5)">Kiss FM</button>
+                <button onclick="setStationFrequency(90.8)">Magic FM</button>
+                <button onclick="setStationFrequency(107.5)">Europa FM</button>
+                <button onclick="setStationFrequency(93.2)">Radio ZU</button>
+                <button onclick="setStationFrequency(96.9)">Pro FM</button>
+                <button onclick="setStationFrequency(99.6)">Digi FM</button>
+                <button onclick="setStationFrequency(100.6)">Rock FM</button>
+                <button onclick="setStationFrequency(104.8)">Virgin Radio</button>
+            </div>
+            <div class="links">
+                <p><a href="#" onclick="fetchRDSInfo()">View RDS Info</a></p>
+                <p id="rds-info"></p>
+                <p><a href="#" onclick="fetchWeather()">View Weather</a></p>
+                <p id="weather-info"></p>
+                <p><a href="#" onclick="connectToInternetRadio()">Connect to Internet Radio</a></p>
+                <p><a href="#" onclick="fetchSignalStrength()">View Signal Strength</a></p>
+                <p id="signal-strength"></p>
+            </div>
         </div>
-        <p>Volume: <span id="volume">5</span></p>
-        <div class="buttons">
-            <button onclick="location.href='/adjust_volume?increase=true'">Volume +</button>
-            <button onclick="location.href='/adjust_volume?increase=false'">Volume -</button>
+        <div id="bluetooth-section" class="section" style="display:none;">
+            <h2>Bluetooth</h2>
+            <!-- Add Bluetooth controls here -->
         </div>
-        <div class="links">
-            <p><a href="/rds">View RDS Info</a></p>
-            <p><a href="/weather">View Weather</a></p>
-            <p><a href="/connect">Connect to Internet Radio</a></p>
+        <div id="settings-section" class="section" style="display:none;">
+            <h2>Settings</h2>
+            <h3>Wi-Fi</h3>
+            <!-- Add Wi-Fi settings controls here -->
+            <h3>System</h3>
+            <!-- Add system settings controls here -->
         </div>
     </div>
 </body>
