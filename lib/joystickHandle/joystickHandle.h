@@ -5,7 +5,6 @@
 #include "hardware.h"
 
 class JoystickHandle {
-
 public:
     JoystickHandle();
     ~JoystickHandle() = default;
@@ -17,13 +16,13 @@ public:
     // getters
     void getJoystickX(int &x) const;
     void getJoystickY(int &y) const;
-    void getJoystickSW(int &sw) const;
-    void getJoystickValues(int &x, int &y, int &sw) const;
+    void getJoystickSW(uint8_t &sw) const;
+    void getJoystickValues(int &x, int &y, uint8_t &sw) const;
 
     private:
     int xValue;
     int yValue;
-    int swValue;
+    uint8_t swValue;
 };
 
 #endif

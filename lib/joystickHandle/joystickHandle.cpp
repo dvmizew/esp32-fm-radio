@@ -39,11 +39,11 @@ void JoystickHandle::getJoystickY(int &y) const {
     y = yValue;
 }
 
-void JoystickHandle::getJoystickSW(int &sw) const {
+void JoystickHandle::getJoystickSW(uint8_t &sw) const {
     sw = swValue;
 }
 
-void JoystickHandle::getJoystickValues(int &x, int &y, int &sw) const {
+void JoystickHandle::getJoystickValues(int &x, int &y, uint8_t &sw) const {
     x = xValue;
     y = yValue;
     sw = swValue;
