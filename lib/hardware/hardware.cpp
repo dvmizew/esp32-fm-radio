@@ -32,26 +32,31 @@ void blinkInternalLED() {
     }
 }
 
+void restartESP() {
+    Serial.println(F("Restarting ESP..."));
+    esp_restart();
+}
+
 void printI2CDevices() {
     Wire.begin();
     byte error, address;
     int nDevices = 0;
 
-    Serial.println("Scanning...");
+    Serial.println(F("Scanning..."));
 
     for (address = 1; address < 127; address++) {
         Wire.beginTransmission(address);
         error = Wire.endTransmission();
 
         if (error == 0) {
-            Serial.print("I2C device found at address 0x");
+            Serial.print(("I2C device found at address 0x"));
             if (address < 16) {
                 Serial.print("0");
             }
             Serial.println(address, HEX);
             nDevices++;
         } else if (error == 4) {
-            Serial.print("Unknown error at address 0x");
+            Serial.print(F("Unknown error at address 0x"));
             if (address < 16) {
                 Serial.print("0");
             }
@@ -60,7 +65,31 @@ void printI2CDevices() {
     }
 
     if (nDevices == 0)
-        Serial.println("No I2C devices found\n");
+        Serial.println(F("No I2C devices found\n"));
     else
-        Serial.println("Done\n");
+        Serial.println(F("Done\n"));
+}
+
+void printSystemInfo() {
+    esp_chip_info_t chip_info;
+    esp_chip_info(&chip_info);
+
+    Serial.println(F("System information:"));
+    Serial.printf("Chip model: %s\n", ESP.getChipModel());
+    Serial.printf("Chip revision: %d\n", ESP.getChipRevision());
+    Serial.printf("Chip frequency: %d MHz\n", ESP.getCpuFreqMHz());
+    Serial.printf("Chip cores: %d\n", ESP.getChipCores());
+    Serial.printf("Flash size: %d MB\n", ESP.getFlashChipSize() / (1024 * 1024));
+    Serial.printf("Free heap: %d KB\n", ESP.getFreeHeap() / 1024);
+    Serial.printf("Total heap: %d KB\n", ESP.getHeapSize()/ 1024);
+    Serial.printf("PSRAM size: %d KB\n", ESP.getPsramSize() / 1024);
+    Serial.printf("Sketch size: %d KB\n", ESP.getSketchSize()/ 1024);
+    Serial.printf("Free sketch space: %d bytes\n", ESP.getFreeSketchSpace());
+    Serial.printf("IDF version: %s\n", esp_get_idf_version());
+    Serial.printf("Chip ID: %08X\n", ESP.getEfuseMac());
+    Serial.printf("Chip model: %s\n", chip_info.model == CHIP_ESP32 ? "ESP32" : "ESP32-S2");
+    Serial.printf("Chip revision: %d\n", chip_info.revision);
+    Serial.printf("Chip cores: %d\n", chip_info.cores);
+    Serial.printf("Chip features: %s\n, %s\n", chip_info.features & CHIP_FEATURE_WIFI_BGN ? "Wi-Fi" : "", chip_info.features & CHIP_FEATURE_BLE ? "BLE" : "");
+    Serial.printf("Chip revision: %d\n", chip_info.revision);
 }

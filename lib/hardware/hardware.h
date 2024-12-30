@@ -5,6 +5,8 @@
 #include <Arduino.h>
 #include <driver/i2s.h>
 
+#define DEVICE_NAME "ESP32inatorul"
+
 // pin definitions
 #define INTERNAL_LED 2
 
@@ -33,7 +35,9 @@ extern i2s_pin_config_t amp_config;
 #define TEA5767_SCL 16
 
 // function prototypes
+void restartESP();
 void blinkInternalLED();
 void printI2CDevices();
+void printSystemInfo();
 
 #endif
