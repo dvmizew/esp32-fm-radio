@@ -13,7 +13,7 @@
 #define MAX_RADIO_STATIONS 20
 
 struct radioStation {
-    char name[32];
+    char name[20];
     float frequency;
 };
 
@@ -27,8 +27,11 @@ public:
     void initRadio();
     void signalStrengthLED();
     void searchRadioStations();
+    void increaseFrequency();
+    void decreaseFrequency();
+    void setFrequency(float freq);
     void printRadioStations();
-    void handleRadioControl();
+    void joystickRadioControl();
     void passAudioToBluetooth(); // pass audio to Bluetooth speaker
     int32_t get_sound_data(Frame *data, int32_t frameCount); // get sound data from radio using I2S
 
@@ -39,8 +42,8 @@ public:
 
 private:
     TEA5767 radio;
-    BluetoothA2DPSource bluetoothRadioSource;
-    JoystickHandle joystick;
+    // BluetoothA2DPSource bluetoothRadioSource;
+    // JoystickHandle joystick;
     char currentStation[16];
     float frequency;
 

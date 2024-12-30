@@ -8,7 +8,7 @@ RadioHandle::RadioHandle() {
 
 void RadioHandle::setupRadio() {
     Wire.begin(TEA5767_SDA, TEA5767_SCL); // start I2C bus with radio pins
-    joystick.setupJoystick(); // for controlling the radio
+    // joystick.setupJoystick(); // for controlling the radio
 }
 
 void RadioHandle::initRadio() {
@@ -41,6 +41,37 @@ void RadioHandle::signalStrengthLED() {
     }
 }
 
+void RadioHandle::increaseFrequency() {
+    frequency += 0.1;
+    if (frequency > 108.0) {
+        frequency = 87.5;
+    }
+    radio.setFrequency(frequency);
+    snprintf(currentStation, sizeof(currentStation), "%.1f FM", frequency);
+    Serial.printf("Frequency increased to: %.1f FM\n", frequency);
+}
+
+void RadioHandle::decreaseFrequency() {
+    frequency -= 0.1;
+    if (frequency < 87.5) {
+        frequency = 108.0;
+    }
+    radio.setFrequency(frequency);
+    snprintf(currentStation, sizeof(currentStation), "%.1f FM", frequency);
+    Serial.printf("Frequency decreased to: %.1f FM\n", frequency);
+}
+
+void RadioHandle::setFrequency(float freq) {
+    if (freq >= 87.5 && freq <= 108.0) {
+        frequency = freq;
+        radio.setFrequency(frequency);
+        snprintf(currentStation, sizeof(currentStation), "%.1f FM", frequency);
+        Serial.printf("Frequency set to: %.1f FM\n", frequency);
+    } else {
+        Serial.println(F("Invalid frequency. Please enter a value between 87.5 and 108.0 MHz."));
+    }
+}
+
 void RadioHandle::searchRadioStations() {
     int foundStations = radio.init(3);
     int stationCount = 0;
@@ -65,11 +96,14 @@ void RadioHandle::printRadioStations() {
     }
 }
 
-void RadioHandle::handleRadioControl() {
+void RadioHandle::joystickRadioControl() {
     // THIS FUNCTION DOESN'T WORK YET
+    JoystickHandle joystick;
+    joystick.setupJoystick();
     joystick.readJoystick();
 
-    int x, y, sw;
+    int x, y;
+    uint8_t sw; // switch
     joystick.getJoystickValues(x, y, sw);
 
     if (sw == HIGH) {
@@ -82,11 +116,11 @@ void RadioHandle::handleRadioControl() {
 
     if (x < (512 - deadZone)) {
         // tune down
-        Serial.println("Tuning down");
+        Serial.println(F("Tuning down"));
         radio.previousStation();
     } else if (x > (512 + deadZone)) {
         // tune up
-        Serial.println("Tuning up");
+        Serial.println(F("Tuning up"));
         radio.nextStation();
     }
 }
@@ -99,6 +133,7 @@ int32_t RadioHandle::get_sound_data(Frame *data, int32_t frameCount) {
 
 void RadioHandle::passAudioToBluetooth() {
     // this function is supposed to pass audio data from get_sound_data to the Bluetooth speaker
+    BluetoothA2DPSource bluetoothRadioSource;
     bluetoothRadioSource.start("Radio");
 }
 
