@@ -23,6 +23,10 @@ public:
     bool isConnected() const; // returns true if some a2dp device is connected
     const char* getDeviceName() const; // returns the device name that is connected
 
+    // tasks
+    static void handleBluetoothControlTask(void *pvParameters);
+    void startHandleBluetoothControlTask();
+
 private:
     static void connectionStateCallback(bool connected); // callback for connection state
 
