@@ -1,61 +1,125 @@
 #include "bluetooth.h"
 
-BluetoothHandle::BluetoothHandle() 
-    : btAudioSink(i2s), 
-      btAudioSource(), 
-      connected(false), 
-      deviceName(DEVICE_NAME) {}
+// global variables
+I2SStream i2s; // for configuring the I2S stream for the amplifier
+BluetoothA2DPSink btAudioSink(i2s); // use ESP32 as speaker
+Audio audio; // for tone control
+// BluetoothA2DPSource btAudioSource; // play through an external speaker
+bool connected = false;
+const char* deviceName = DEVICE_NAME;
 
-void BluetoothHandle::initializeBluetoothSpeaker() {
+void initializeBluetoothSpeaker() {
     Serial.begin(115200);
 
-    audio.setPinout(AMP_BLCK, AMP_LRC, AMP_DIN);
-    audio.setVolume(100);
+    // old way, sounds better but crashes after a while
+    // audio.setPinout(AMP_BLCK, AMP_LRC, AMP_DIN);
+    // audio.setVolume(100);
+
+    // initialize I2SStream
+    auto cfg = i2s.defaultConfig();
+    cfg.pin_bck = AMP_BLCK;
+    cfg.pin_ws = AMP_LRC;
+    cfg.pin_data = AMP_DIN;
+    cfg.bits_per_sample = I2S_BITS_PER_SAMPLE_16BIT;
+    cfg.channel_format = I2S_CHANNEL_FMT_RIGHT_LEFT;
+    cfg.use_apll = false;
+    i2s.begin(cfg);
+
+    // hopefully this will make the sound better
+    // set it to 0 to disable, 100 to max
+    const int8_t gainLowPass = 5;   // increase bass
+    const int8_t gainBandPass = 3;  // mid-range
+    const int8_t gainHighPass = 4;  // increase treble
+    audio.setTone(gainLowPass, gainBandPass, gainHighPass);
+
+    btAudioSink.start(deviceName);
 
     // getting metadata from A2DP source
     btAudioSink.set_avrc_metadata_callback([](uint8_t id, const uint8_t *value) {
         if (value == nullptr || strlen((const char *)value) == 0) {
             return;
         }
-        
-        if (id == ESP_AVRC_MD_ATTR_TITLE) { // title metadata
-            Serial.print(F("Title: "));
-            Serial.println((const char *)value);
-        } else if (id == ESP_AVRC_MD_ATTR_ARTIST) { // artist metadata
-            Serial.print(F("Artist: "));
-            Serial.println((const char *)value);
-        } else if (id == ESP_AVRC_MD_ATTR_ALBUM) { // album metadata
-            Serial.print(F("Album: "));
-            Serial.println((const char *)value);
-        } else if (id == ESP_AVRC_MD_ATTR_NUM_TRACKS) { // number of tracks metadata
-            Serial.print(F("Number of tracks: "));
-            Serial.println((const char *)value);
-        } else if (id == ESP_AVRC_MD_ATTR_GENRE) { // genre metadata
-            Serial.print(F("Genre: "));
-            Serial.println((const char *)value);
-        } else if (id == ESP_AVRC_MD_ATTR_PLAYING_TIME) { // playing time metadata
-            Serial.print(F("Playing time: "));
-            Serial.println((const char *)value);
-        } else if (id == ESP_AVRC_MD_ATTR_TRACK_NUM) { // track number metadata
-            Serial.print(F("Track number: "));
-            Serial.println((const char *)value);
+
+        switch (id) {
+            case ESP_AVRC_MD_ATTR_TITLE:
+                Serial.print(F("Title: "));
+                break;
+            case ESP_AVRC_MD_ATTR_ARTIST:
+                Serial.print(F("Artist: "));
+                break;
+            case ESP_AVRC_MD_ATTR_ALBUM:
+                Serial.print(F("Album: "));
+                break;
+            case ESP_AVRC_MD_ATTR_GENRE:
+                Serial.print(F("Genre: "));
+                break;
+            case ESP_AVRC_MD_ATTR_PLAYING_TIME:
+                Serial.print(F("Playing time: "));
+                break;
+            case ESP_AVRC_MD_ATTR_TRACK_NUM:
+                Serial.print(F("Track number: "));
+                break;
+            default:
+                return;
         }
+        Serial.println((const char *)value);
     });
 
-    btAudioSink.set_avrc_connection_state_callback(BluetoothHandle::connectionStateCallback);
+    btAudioSink.set_avrc_connection_state_callback(connectionStateCallback);
     
-    // btAudioSink.set_auto_reconnect(true, 1000); // auto reconnect after 1 second
-    btAudioSink.set_pin_config(amp_config); // pin config for MAX98357A amplifier
-    btAudioSink.start(deviceName); // start Bluetooth sink with device name
-    Serial.println(F("Bluetoothinatorul is now discoverable"));
+    btAudioSink.set_auto_reconnect(true, 1000); // auto reconnect after 1 second
+    Serial.printf_P(PSTR("%s is now discoverable\n"), DEVICE_NAME);
 }
 
-void BluetoothHandle::playThroughBluetoothSpeaker() {
-    // btAudioSource.start("Bluetoothinatorul");
-    // btAudioSource.write_data();
+void deinitializeBluetoothSpeaker() {
+    btAudioSink.stop();
+    i2s.end();
+    Serial.end();
 }
 
-void BluetoothHandle::handleBluetoothControl() {
+void disconnectBluetoothSinkDevice() {
+    btAudioSink.disconnect();
+}
+
+void disableBluetoothSpeaker() {
+    disconnectBluetoothSinkDevice();
+    deinitializeBluetoothSpeaker();
+}
+
+void playNextTrack() {
+    btAudioSink.next();
+}
+
+void playPreviousTrack() {
+    btAudioSink.previous();
+}
+
+void togglePlayback() {
+    btAudioSink.pause();
+}
+
+void volumeUp() {
+    int volume = btAudioSink.get_volume();
+    if (volume < 100) {
+        volume += 5;
+        btAudioSink.set_volume(volume);
+    }
+}
+
+void volumeDown() {
+    int volume = btAudioSink.get_volume();
+    if (volume > 0) {
+        volume -= 5;
+        btAudioSink.set_volume(volume);
+    }
+}
+
+void volumeChange(int volume) {
+    // volume range is 0-100
+    btAudioSink.set_volume(volume);
+}
+
+void joystickHandleBluetoothControl() {
     // avrcp commands using the joystick
     JoystickHandle joystick;
     joystick.setupJoystick();
@@ -89,34 +153,34 @@ void BluetoothHandle::handleBluetoothControl() {
     }
 }
 
-void BluetoothHandle::handleBluetoothControlTask(void *pvParameters) {
-    BluetoothHandle *bluetoothHandle = static_cast<BluetoothHandle*>(pvParameters);
+void handleBluetoothControlTask(void *pvParameters) {
     while (true) {
-        bluetoothHandle->handleBluetoothControl();
+        joystickHandleBluetoothControl();
     }
     vTaskDelete(NULL);
 }
 
-void BluetoothHandle::startHandleBluetoothControlTask() {
-    xTaskCreate(&BluetoothHandle::handleBluetoothControlTask, "BluetoothControlTask", 2048, this, 1, NULL);
+void startHandleBluetoothControlTask() {
+    xTaskCreate(&handleBluetoothControlTask, "BluetoothControlTask", 2048, NULL, 1, NULL);
 }
 
-// getters
-bool BluetoothHandle::isConnected() const {
+bool bluetoothIsConnected() {
     return connected;
 }
 
-const char* BluetoothHandle::getDeviceName() const {
+const char* getBluetoothDeviceName() {
     return deviceName; // return this device's name
 }
 
-void BluetoothHandle::connectionStateCallback(bool connected) {
+void connectionStateCallback(bool isConnected) {
     pinMode(INTERNAL_LED, OUTPUT);
-    if (connected) {
+    if (isConnected) {
         Serial.println(F("Connected to A2DP source"));
         digitalWrite(INTERNAL_LED, HIGH);
+        connected = true;
     } else {
         Serial.println(F("Disconnected from A2DP source"));
         digitalWrite(INTERNAL_LED, LOW);
+        connected = false;
     }
 }
