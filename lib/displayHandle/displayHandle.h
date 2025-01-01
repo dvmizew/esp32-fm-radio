@@ -44,16 +44,16 @@ public:
     void displayAudioInfo();
 
     // tasks
-    static void printResourceUsageTask(void *pvParameters);
-    static void printDateTimeTask(void *pvParameters);
-    static void printBluetoothInfoTask(void *pvParameters);
-    static void printRadioInfoTask(void *pvParameters);
+    static void displayResourceUsageTask(void *pvParameters);
+    static void displayDateTimeTask(void *pvParameters);
+    static void displayBluetoothInfoTask(void *pvParameters);
+    static void displayRadioInfoTask(void *pvParameters);
 
     // start tasks
-    void startPrintResourceUsageTask();
-    void startPrintDateTimeTask();
-    void startPrintBluetoothInfoTask();
-    void startPrintRadioInfoTask();
+    void displayPrintResourceUsageTask();
+    void displayPrintDateTimeTask();
+    void displayPrintBluetoothInfoTask();
+    void displayPrintRadioInfoTask();
 
     // getter
     bool isDisplayInitialized() const;

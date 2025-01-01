@@ -49,14 +49,14 @@ void DisplayHandle::displayCurrentDateTime() {
     }
 }
 
-void DisplayHandle::printDateTimeTask(void *pvParameters) {
+void DisplayHandle::displayDateTimeTask(void *pvParameters) {
     DisplayHandle *displayHandle = static_cast<DisplayHandle*>(pvParameters);
     displayHandle->displayCurrentDateTime();
     vTaskDelete(NULL);
 }
 
-void DisplayHandle::startPrintDateTimeTask() {
-    xTaskCreate(&DisplayHandle::printDateTimeTask, "DateTimeTask", 2048, this, 1, NULL);
+void DisplayHandle::displayPrintDateTimeTask() {
+    xTaskCreate(&DisplayHandle::displayDateTimeTask, "DateTimeTask", 2048, this, 1, NULL);
 }
 
 void DisplayHandle::displayResourceUsage() {
@@ -64,33 +64,38 @@ void DisplayHandle::displayResourceUsage() {
     display.setCursor(0, 0);
 
     while (true) {
-        if (!heap_caps_check_integrity_all(true)) {
-            Serial.println(F("Heap corruption detected!"));
-        }
+        // get heap info
+        multi_heap_info_t heapInfo;
+        heap_caps_get_info(&heapInfo, MALLOC_CAP_DEFAULT);
+
+        size_t totalHeap = ESP.getHeapSize();
+        size_t freeHeap = heapInfo.total_free_bytes;
+        size_t usedHeap = totalHeap - freeHeap;
 
         display.clearDisplay();
         display.setCursor(0, 0);
         display.println(F("RESOURCE USAGE\n"));
-        display.printf("Total heap: %d KB\n", ESP.getHeapSize() / 1024);
-        display.printf("Free Heap: %d KB\n", ESP.getFreeHeap() / 1024);
-        display.printf("Total heap used:\n%d KB\n", ESP.getMaxAllocHeap() / 1024);
+        display.printf("Total heap: %d KB\n", totalHeap / 1024);
+        display.printf("Free Heap: %d KB\n", freeHeap / 1024);
+        display.printf("Used Heap: %d KB\n", usedHeap / 1024);
         if (ESP.getFreePsram() > 0) // check if PSRAM is available
             display.printf("Free PSRAM: %d KB\n", ESP.getFreePsram() / 1024);
-        display.printf("Free SPIFFS: %d KB\n", SPIFFS.totalBytes() / 1024 - SPIFFS.usedBytes() / 1024);
+        display.printf("Free SPIFFS: %d KB\n", (SPIFFS.totalBytes() - SPIFFS.usedBytes()) / 1024);
         display.printf("Chip Temp: %0.2f C\n", (double)temperatureRead());
         display.display();
+
         vTaskDelay(1000 / portTICK_PERIOD_MS); // 1 second delay
     }
 }
 
-void DisplayHandle::printResourceUsageTask(void *pvParameters) {
+void DisplayHandle::displayResourceUsageTask(void *pvParameters) {
     DisplayHandle *displayHandle = static_cast<DisplayHandle*>(pvParameters);
     displayHandle->displayResourceUsage();
     vTaskDelete(NULL);
 }
 
-void DisplayHandle::startPrintResourceUsageTask() {
-    xTaskCreate(&DisplayHandle::printResourceUsageTask, "ResourceUsageTask", 2048, this, 1, NULL);
+void DisplayHandle::displayPrintResourceUsageTask() {
+    xTaskCreate(&DisplayHandle::displayResourceUsageTask, "ResourceUsageTask", 2048, this, 1, NULL);
 }
 
 void DisplayHandle::displaySystemInfo() {
@@ -177,14 +182,14 @@ void DisplayHandle::displayBluetoothInfo() {
     }
 }
 
-void DisplayHandle::printBluetoothInfoTask(void *pvParameters) {
+void DisplayHandle::displayBluetoothInfoTask(void *pvParameters) {
     DisplayHandle *displayHandle = static_cast<DisplayHandle*>(pvParameters);
     displayHandle->displayBluetoothInfo();
     vTaskDelete(NULL);
 }
 
-void DisplayHandle::startPrintBluetoothInfoTask() {
-    xTaskCreate(&DisplayHandle::printBluetoothInfoTask, "BluetoothInfoTask", 2048, this, 1, NULL);
+void DisplayHandle::displayPrintBluetoothInfoTask() {
+    xTaskCreate(&DisplayHandle::displayBluetoothInfoTask, "BluetoothInfoTask", 2048, this, 1, NULL);
 }
 
 void DisplayHandle::displayRadioInfo() {
@@ -202,14 +207,14 @@ void DisplayHandle::displayRadioInfo() {
     }
 }
 
-void DisplayHandle::printRadioInfoTask(void *pvParameters) {
+void DisplayHandle::displayRadioInfoTask(void *pvParameters) {
     DisplayHandle *displayHandle = static_cast<DisplayHandle*>(pvParameters);
     displayHandle->displayRadioInfo();
     vTaskDelete(NULL);
 }
 
-void DisplayHandle::startPrintRadioInfoTask() {
-    xTaskCreate(&DisplayHandle::printRadioInfoTask, "RadioInfoTask", 2048, this, 1, NULL);
+void DisplayHandle::displayPrintRadioInfoTask() {
+    xTaskCreate(&DisplayHandle::displayRadioInfoTask, "RadioInfoTask", 2048, this, 1, NULL);
 }
 
 void DisplayHandle::displayWeatherInfo() {
