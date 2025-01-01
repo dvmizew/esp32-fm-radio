@@ -130,3 +130,18 @@ function showSection(sectionId) {
 function toggleDarkMode() {
     document.body.classList.toggle('dark-mode');
 }
+
+function restartESP() {
+    fetch('/restart')
+        .then(response => {
+            if (response.ok) {
+                alert('ESP32 is restarting...');
+            } else {
+                alert('Failed to restart ESP32');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to restart ESP32');
+        });
+}

@@ -237,3 +237,9 @@ body.dark-mode .dark-mode-toggle {
 body.dark-mode .dark-mode-toggle:hover {
     background-color: #3700b3;
 }
+
+.restart-button {
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+}
