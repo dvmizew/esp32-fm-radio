@@ -1,15 +1,9 @@
 // #include <Arduino.h>
 #include "displayHandle.h"
-// #include "radioHandle.h"
-// #include "wifiHandle.h"
-// #include "bluetooth.h"
 #include "webserverHandle.h"
-// #include "spotify.h"
 
 // global objects for testing
 DisplayHandle displayHandle;
-// JoystickHandle joystick;
-// SpotifyHandle spotify; // doesn't work yet
 
 void setup() {
     Serial.begin(115200);
@@ -42,7 +36,7 @@ void setup() {
     // blinkInternalLED();
 
     // Bluetooth testing
-    initializeBluetoothSpeaker();
+    // initializeBluetoothSpeaker();
 
     // if (bluetoothIsConnected()) {
     //     Serial.println(F("Bluetooth connected."));
@@ -50,15 +44,11 @@ void setup() {
     // }
 
     // Web server testing
-    // initSPIFFS();
-    // setupWebServer();
+    initSPIFFS();
+    setupWebServer();
 
     displayHandle.displayResourceUsage();
     // displayHandle.displayWiFiConnectionStatus();
-
-    // Spotify testing
-    // spotify.setupSpotify();
-    // it doesn't work at this point
 }
 
 void loop() {
