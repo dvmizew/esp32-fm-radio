@@ -20,7 +20,6 @@ void DisplayHandle::initDisplay() {
 
 void DisplayHandle::displayCustomMessage(const char *message) {
     clearAndUpdate();
-    display.setCursor(0, 0);
     display.setTextSize(strlen(message) > 16 ? 1 : 2);
     display.println(message);
     display.display();
@@ -29,7 +28,6 @@ void DisplayHandle::displayCustomMessage(const char *message) {
 void DisplayHandle::displayCurrentDateTime() {
     while (true) {
         clearAndUpdate();
-        display.setCursor(0, 0);
         
         configTime(0, 0, "pool.ntp.org", "time.nist.gov"); // get time from NTP server
 
@@ -61,7 +59,6 @@ void DisplayHandle::displayPrintDateTimeTask() {
 
 void DisplayHandle::displayResourceUsage() {
     clearAndUpdate();
-    display.setCursor(0, 0);
 
     while (true) {
         // get heap info
@@ -71,6 +68,8 @@ void DisplayHandle::displayResourceUsage() {
         size_t totalHeap = ESP.getHeapSize();
         size_t freeHeap = heapInfo.total_free_bytes;
         size_t usedHeap = totalHeap - freeHeap;
+        size_t freeSPIFFFS = SPIFFS.totalBytes() - SPIFFS.usedBytes();
+        size_t freePSRAM = ESP.getFreePsram();
 
         display.clearDisplay();
         display.setCursor(0, 0);
@@ -78,9 +77,10 @@ void DisplayHandle::displayResourceUsage() {
         display.printf("Total heap: %d KB\n", totalHeap / 1024);
         display.printf("Free Heap: %d KB\n", freeHeap / 1024);
         display.printf("Used Heap: %d KB\n", usedHeap / 1024);
-        if (ESP.getFreePsram() > 0) // check if PSRAM is available
-            display.printf("Free PSRAM: %d KB\n", ESP.getFreePsram() / 1024);
-        display.printf("Free SPIFFS: %d KB\n", (SPIFFS.totalBytes() - SPIFFS.usedBytes()) / 1024);
+        if (freePSRAM > 0) // check if PSRAM is available
+            display.printf("Free PSRAM: %d KB\n", freePSRAM / 1024);
+        if (freeSPIFFFS > 0)
+            display.printf("Free SPIFFS: %d KB\n", freeSPIFFFS / 1024);
         display.printf("Chip Temp: %0.2f C\n", (double)temperatureRead());
         display.display();
 
@@ -100,7 +100,6 @@ void DisplayHandle::displayPrintResourceUsageTask() {
 
 void DisplayHandle::displaySystemInfo() {
     clearAndUpdate();
-    display.setCursor(0, 0);
 
     display.printf("CPU Freq: %d MHz\n", ESP.getCpuFreqMHz());
     display.printf("Total Heap: %d KB\n", ESP.getHeapSize() / 1024);
@@ -119,7 +118,6 @@ void DisplayHandle::displaySystemInfo() {
 
 void DisplayHandle::displaySPIFFSInfo() {
     clearAndUpdate();
-    display.setCursor(0, 0);
 
     if (!SPIFFS.begin(true)) {
         display.println("Failed to mount SPIFFS");
@@ -136,7 +134,6 @@ void DisplayHandle::displaySPIFFSInfo() {
 // print methods from other modules
 void DisplayHandle::displayWiFiNetworks() {
     clearAndUpdate();
-    display.setCursor(0, 0);
 
     int availableNetworkCount = WiFi.scanNetworks();
     display.println("Wi-Fi Networks");
@@ -149,7 +146,6 @@ void DisplayHandle::displayWiFiNetworks() {
 
 void DisplayHandle::displayWiFiConnectionStatus() {
     clearAndUpdate();
-    display.setCursor(0, 0);
 
     if (isWiFiConnected()) {
         display.println("Wi-Fi Connected\n");
@@ -168,7 +164,6 @@ void DisplayHandle::displayWiFiConnectionStatus() {
 
 void DisplayHandle::displayBluetoothInfo() {
     clearAndUpdate();
-    display.setCursor(0, 0);
 
     while (true) {
         display.clearDisplay();
@@ -194,7 +189,6 @@ void DisplayHandle::displayPrintBluetoothInfoTask() {
 
 void DisplayHandle::displayRadioInfo() {
     clearAndUpdate();
-    display.setCursor(0, 0);
 
     while (true) {
         display.println("Radio Info");
@@ -227,7 +221,6 @@ void DisplayHandle::displayRDSInfo() {
 
 void DisplayHandle::displayBluetoothConnectionStatus() {
     clearAndUpdate();
-    display.setCursor(0, 0);
 
     if (bluetoothIsConnected()) {
         display.println("Bluetooth Connected");
