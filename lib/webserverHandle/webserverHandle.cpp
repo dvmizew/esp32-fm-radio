@@ -4,7 +4,7 @@ AsyncWebServer server(80);
 
 void connectToWifi() {
     if (!isWiFiConnected()) {
-        connectToWiFiNetwork("ssid", "password"); // replace with your Wi-Fi credentials
+        connectToWiFiNetwork(SSID, PASSWORD); // replace with your own wifi credentials in lib/wifiHandle/wifiCredentials.h
     }
     Serial.printf_P(PSTR("\nConnected to Wi-Fi\nClick here to open the web interface: http://%s\n\n"), WiFi.localIP().toString().c_str());
 }
