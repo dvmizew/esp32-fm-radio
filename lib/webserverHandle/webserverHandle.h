@@ -6,7 +6,6 @@
 #include <FS.h> // file system
 #include <AsyncTCP.h> // for TCP connection
 #include "wifiHandle.h" // for network connection
-#include "wifiCredentials.h" // for network credentials
 #include "radioHandle.h" // for radio control
 #include "bluetooth.h" // for Bluetooth control
 
