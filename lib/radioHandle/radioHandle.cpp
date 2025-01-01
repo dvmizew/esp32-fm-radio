@@ -1,15 +1,17 @@
 #include "radioHandle.h"
 
-static char currentStation[20] = "107.5 FM";
+static char currentStation[10] = "107.5 FM";
 static float frequency = 107.5;
-static radioStation stations[MAX_RADIO_STATIONS];
+static radioStation stations[MAX_RADIO_STATIONS]; // array of radio stations found during search
 static TEA5767 radio;
 
 void setupRadio() {
+    // start I2C bus with radio pins
     Wire.begin(TEA5767_SDA, TEA5767_SCL); // start I2C bus with radio pins
 }
 
 void initRadio() {
+    // start radio module with default settings
     setupRadio();
     radio.setFrequency(frequency);  // set initial frequency to 107.5 FM
     Serial.println(F("Radio initialized!"));
@@ -84,7 +86,7 @@ void setRadioFrequency(float freq) {
 }
 
 void searchRadioStations() {
-    int foundStations = radio.init(3);
+    int foundStations = radio.init(3); // search for radio stations with a signal level of 3
     int stationCount = 0;
 
     Serial.println(F("Searching for radio stations..."));
