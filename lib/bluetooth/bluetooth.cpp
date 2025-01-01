@@ -3,7 +3,7 @@
 // global variables
 I2SStream i2s; // for configuring the I2S stream for the amplifier
 BluetoothA2DPSink btAudioSink(i2s); // use ESP32 as speaker
-Audio audio; // for tone control
+// Audio audio; // for tone control
 // BluetoothA2DPSource btAudioSource; // play through an external speaker
 bool connected = false;
 const char* deviceName = DEVICE_NAME;
@@ -27,10 +27,10 @@ void initializeBluetoothSpeaker() {
 
     // hopefully this will make the sound better
     // set it to 0 to disable, 100 to max
-    const int8_t gainLowPass = 5;   // increase bass
-    const int8_t gainBandPass = 3;  // mid-range
-    const int8_t gainHighPass = 4;  // increase treble
-    audio.setTone(gainLowPass, gainBandPass, gainHighPass);
+    // const int8_t gainLowPass = 5;   // increase bass
+    // const int8_t gainBandPass = 3;  // mid-range
+    // const int8_t gainHighPass = 4;  // increase treble
+    // audio.setTone(gainLowPass, gainBandPass, gainHighPass);
 
     btAudioSink.start(deviceName);
 

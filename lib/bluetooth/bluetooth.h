@@ -7,13 +7,13 @@
 #include <AudioTools.h>
 #include <BluetoothA2DPSink.h>
 #include <BluetoothA2DPSource.h>
-#include <Audio.h>
+// #include <Audio.h>
 
 // global variables
 extern I2SStream i2s; // for configuring the I2S stream for the amplifier
 extern BluetoothA2DPSink btAudioSink; // use ESP32 as speaker
 // extern BluetoothA2DPSource btAudioSource; // play through an external speaker
-extern Audio audio; // for tone control (bass, mid-range, treble)
+// extern Audio audio; // for tone control (bass, mid-range, treble)
 // also used for the old way of playing audio through the amplifier, which crashes after a while
 extern bool connected;
 extern const char* deviceName;
