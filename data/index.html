@@ -22,6 +22,7 @@
     <div class="main-content">
         <div id="radio-section" class="section">
             <h2>Radio</h2>
+            <button onclick="toggleRadio()">Toggle Radio</button>
             <p>Current station: <span id="frequency">107.5</span> MHz</p>
             <div class="buttons">
                 <button onclick="changeStation(true)">+0.1 MHz</button>
@@ -57,8 +58,18 @@
             </div>
         </div>
         <div id="bluetooth-section" class="section" style="display:none;">
-            <h2>Bluetooth</h2>
-            <!-- Add Bluetooth controls here -->
+            <h2>Bluetooth Speaker</h2>
+            <button onclick="toggleBluetooth()">Toggle Bluetooth</button>
+            <div class="buttons">
+                <button onclick="playPreviousTrack()">Previous Track</button>
+                <button onclick="togglePlayback()">Play/Pause</button>
+                <button onclick="playNextTrack()">Next Track</button>
+            </div>
+            <p>Volume: <span id="bt-volume">50</span></p>
+            <div class="buttons">
+                <button onclick="volumeUp()">Volume +</button>
+                <button onclick="volumeDown()">Volume -</button>
+            </div>
         </div>
         <div id="settings-section" class="section" style="display:none;">
             <h2>Settings</h2>

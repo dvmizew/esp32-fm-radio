@@ -1,3 +1,19 @@
+function toggleRadio() {
+    fetch('/toggleRadio')
+        .then(response => response.text())
+        .then(data => {
+            console.log(data);
+        });
+}
+
+function toggleBluetooth() {
+    fetch('/toggleBluetooth')
+        .then(response => response.text())
+        .then(data => {
+            console.log(data);
+        });
+}
+
 function changeStation(increase) {
     fetch(`/change_station?increase=${increase}`)
         .then(response => response.json())
@@ -60,6 +76,46 @@ function setStationFrequency(frequency) {
         .then(response => response.json())
         .then(data => {
             document.getElementById('frequency').innerText = data.frequency;
+        });
+}
+
+function playNextTrack() {
+    fetch('/playNextTrack')
+        .then(response => response.text())
+        .then(data => {
+            console.log(data);
+        });
+}
+
+function playPreviousTrack() {
+    fetch('/playPreviousTrack')
+        .then(response => response.text())
+        .then(data => {
+            console.log(data);
+        });
+}
+
+function togglePlayback() {
+    fetch('/togglePlayback')
+        .then(response => response.text())
+        .then(data => {
+            console.log(data);
+        });
+}
+
+function volumeUp() {
+    fetch('/volumeUp')
+        .then(response => response.text())
+        .then(data => {
+            console.log(data);
+        });
+}
+
+function volumeDown() {
+    fetch('/volumeDown')
+        .then(response => response.text())
+        .then(data => {
+            console.log(data);
         });
 }
 
