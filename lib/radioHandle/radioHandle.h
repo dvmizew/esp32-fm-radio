@@ -17,37 +17,23 @@ struct radioStation {
     float frequency;
 };
 
-class RadioHandle {
-public:
-    RadioHandle();
-    ~RadioHandle() = default;
-    
-    // methods
-    void setupRadio(); // setup radio pins
-    void initRadio();
-    void signalStrengthLED();
-    void searchRadioStations();
-    void increaseFrequency();
-    void decreaseFrequency();
-    void setFrequency(float freq);
-    void printRadioStations();
-    void joystickRadioControl();
-    void passAudioToBluetooth(); // pass audio to Bluetooth speaker
-    int32_t get_sound_data(Frame *data, int32_t frameCount); // get sound data from radio using I2S
+void setupRadio();
+void initRadio();
+void enableRadio();
+void disableRadio();
+void signalStrengthLED();
+void increaseRadioFrequency();
+void decreaseRadioFrequency();
+void setRadioFrequency(float freq);
+void searchRadioStations();
+void printRadioStations();
+void joystickRadioControl();
+int32_t get_sound_data(Frame *data, int32_t frameCount);
+void passAudioToBluetooth();
 
-    // getters
-    const char* getCurrentStation() const;
-    float getFrequency() const;
-    short getSignalLevel() const;
-
-private:
-    TEA5767 radio;
-    // BluetoothA2DPSource bluetoothRadioSource;
-    // JoystickHandle joystick;
-    char currentStation[16];
-    float frequency;
-
-    radioStation stations[MAX_RADIO_STATIONS];
-};
+// getters
+const char* getCurrentStation();
+float getFrequency();
+short getSignalLevel();
 
 #endif

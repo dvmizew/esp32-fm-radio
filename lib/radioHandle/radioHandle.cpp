@@ -1,17 +1,15 @@
 #include "radioHandle.h"
 
-RadioHandle::RadioHandle() {
-    // default values (known radio station Europa FM (pe aceeasi frecventa cu tine))
-    snprintf(currentStation, sizeof(currentStation), "107.5 FM");
-    frequency = 107.5;
-}
+static char currentStation[20] = "107.5 FM";
+static float frequency = 107.5;
+static radioStation stations[MAX_RADIO_STATIONS];
+static TEA5767 radio;
 
-void RadioHandle::setupRadio() {
+void setupRadio() {
     Wire.begin(TEA5767_SDA, TEA5767_SCL); // start I2C bus with radio pins
-    // joystick.setupJoystick(); // for controlling the radio
 }
 
-void RadioHandle::initRadio() {
+void initRadio() {
     setupRadio();
     radio.setFrequency(frequency);  // set initial frequency to 107.5 FM
     Serial.println(F("Radio initialized!"));
@@ -19,7 +17,20 @@ void RadioHandle::initRadio() {
     Serial.println(frequency);
 }
 
-void RadioHandle::signalStrengthLED() {
+void enableRadio() {
+    setupRadio();
+    initRadio();
+    radio.setMuted(false);
+    radio.setStandby(false);
+}
+
+void disableRadio() {
+    radio.setMuted(true);
+    radio.setFrequency(0.0);
+    radio.setStandby(true);
+}
+
+void signalStrengthLED() {
     pinMode(INTERNAL_LED, OUTPUT);
     while (true) {
         // this function lights up the LED based on the signal strength
@@ -41,38 +52,38 @@ void RadioHandle::signalStrengthLED() {
     }
 }
 
-void RadioHandle::increaseFrequency() {
+void increaseRadioFrequency() {
     frequency += 0.1;
     if (frequency > 108.0) {
         frequency = 87.5;
     }
     radio.setFrequency(frequency);
     snprintf(currentStation, sizeof(currentStation), "%.1f FM", frequency);
-    Serial.printf("Frequency increased to: %.1f FM\n", frequency);
+    Serial.printf_P(PSTR("Frequency increased to: %.1f FM\n"), frequency);
 }
 
-void RadioHandle::decreaseFrequency() {
+void decreaseRadioFrequency() {
     frequency -= 0.1;
     if (frequency < 87.5) {
         frequency = 108.0;
     }
     radio.setFrequency(frequency);
     snprintf(currentStation, sizeof(currentStation), "%.1f FM", frequency);
-    Serial.printf("Frequency decreased to: %.1f FM\n", frequency);
+    Serial.printf_P(PSTR("Frequency decreased to: %.1f FM\n"), frequency);
 }
 
-void RadioHandle::setFrequency(float freq) {
+void setRadioFrequency(float freq) {
     if (freq >= 87.5 && freq <= 108.0) {
         frequency = freq;
         radio.setFrequency(frequency);
         snprintf(currentStation, sizeof(currentStation), "%.1f FM", frequency);
-        Serial.printf("Frequency set to: %.1f FM\n", frequency);
+        Serial.printf_P(PSTR("Frequency set to: %.1f FM\n"), frequency);
     } else {
         Serial.println(F("Invalid frequency. Please enter a value between 87.5 and 108.0 MHz."));
     }
 }
 
-void RadioHandle::searchRadioStations() {
+void searchRadioStations() {
     int foundStations = radio.init(3);
     int stationCount = 0;
 
@@ -84,19 +95,19 @@ void RadioHandle::searchRadioStations() {
         }
 
         stations[stationCount].frequency = station;
-        Serial.printf("Station %d: %.1f FM\n", stationCount + 1, station);
+        Serial.printf_P(PSTR("Station %d: %.1f FM\n"), stationCount + 1, station);
         stationCount++;
     }
 }
 
-void RadioHandle::printRadioStations() {
+void printRadioStations() {
     Serial.println(F("Radio stations:"));
     for (int i = 0; i < MAX_RADIO_STATIONS; ++i) {
         Serial.printf("Station %d: %.1f FM\n", i + 1, stations[i].frequency);
     }
 }
 
-void RadioHandle::joystickRadioControl() {
+void joystickRadioControl() {
     // THIS FUNCTION DOESN'T WORK YET
     JoystickHandle joystick;
     joystick.setupJoystick();
@@ -125,27 +136,27 @@ void RadioHandle::joystickRadioControl() {
     }
 }
 
-int32_t RadioHandle::get_sound_data(Frame *data, int32_t frameCount) {
+int32_t get_sound_data(Frame *data, int32_t frameCount) {
     // this function is supposed to get sound data from TEA5767 using I2S
     // TODO
     return frameCount;
 }
 
-void RadioHandle::passAudioToBluetooth() {
+void passAudioToBluetooth() {
     // this function is supposed to pass audio data from get_sound_data to the Bluetooth speaker
     BluetoothA2DPSource bluetoothRadioSource;
-    bluetoothRadioSource.start("Radio");
+    bluetoothRadioSource.start(DEVICE_NAME);
 }
 
 // getters
-const char* RadioHandle::getCurrentStation() const {
+const char* getCurrentStation() {
     return currentStation;
 }
 
-float RadioHandle::getFrequency() const {
+float getFrequency() {
     return frequency;
 }
 
-short RadioHandle::getSignalLevel() const {
-    return getSignalLevel();
+short getSignalLevel() {
+    return radio.getSignalLevel();
 }
