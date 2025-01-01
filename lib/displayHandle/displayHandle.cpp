@@ -142,7 +142,6 @@ void DisplayHandle::displayWiFiNetworks() {
     display.println("Wi-Fi Networks");
     display.printf("Total: %d\n", availableNetworkCount);
     for (int i = 0; i < availableNetworkCount; ++i) {
-        // Serial.printf("%d: %s (%d)\n", i + 1, WiFi.SSID(i).c_str(), WiFi.RSSI(i));
         display.printf("%d: %s\n", i + 1, WiFi.SSID(i).c_str());
     }
     display.display();
@@ -167,17 +166,16 @@ void DisplayHandle::displayWiFiConnectionStatus() {
     display.display();
 }
 
-void DisplayHandle::displayBluetoothInfo(BluetoothHandle &bluetoothObject) {
+void DisplayHandle::displayBluetoothInfo() {
     clearAndUpdate();
     display.setCursor(0, 0);
 
-    // BluetoothHandle bluetoothHandle;
     while (true) {
         display.clearDisplay();
         display.setCursor(0, 0);
         display.println("Bluetooth Info");
-        display.printf("This Device: \n%s\n", bluetoothObject.getDeviceName());
-        display.printf("Connected: %s\n", bluetoothObject.isConnected() ? "Yes" : "No");
+        display.printf("This Device: \n%s\n", getBluetoothDeviceName());
+        display.printf("Connected: %s\n", bluetoothIsConnected ? "Yes" : "No");
 
         display.display();
         vTaskDelay(1000 / portTICK_PERIOD_MS); // 1 second delay
@@ -186,8 +184,7 @@ void DisplayHandle::displayBluetoothInfo(BluetoothHandle &bluetoothObject) {
 
 void DisplayHandle::printBluetoothInfoTask(void *pvParameters) {
     DisplayHandle *displayHandle = static_cast<DisplayHandle*>(pvParameters);
-    BluetoothHandle bluetoothObject;
-    displayHandle->displayBluetoothInfo(bluetoothObject);
+    displayHandle->displayBluetoothInfo();
     vTaskDelete(NULL);
 }
 
@@ -195,16 +192,15 @@ void DisplayHandle::startPrintBluetoothInfoTask() {
     xTaskCreate(&DisplayHandle::printBluetoothInfoTask, "BluetoothInfoTask", 4096, this, 1, NULL);
 }
 
-void DisplayHandle::displayRadioInfo(RadioHandle &radioObject) {
+void DisplayHandle::displayRadioInfo() {
     clearAndUpdate();
     display.setCursor(0, 0);
 
-    // RadioHandle radioHandle;
     while (true) {
         display.println("Radio Info");
-        display.printf("Station: %s\n", radioObject.getCurrentStation());
-        display.printf("Frequency: %.1f FM\n", radioObject.getFrequency());
-        display.printf("Signal Level: %d\n", radioObject.getSignalLevel());
+        display.printf("Station: %s\n", getCurrentStation());
+        display.printf("Frequency: %.1f FM\n", getFrequency());
+        display.printf("Signal Level: %d\n", getSignalLevel());
 
         display.display();
         vTaskDelay(1000 / portTICK_PERIOD_MS); // 1 second delay
@@ -213,8 +209,7 @@ void DisplayHandle::displayRadioInfo(RadioHandle &radioObject) {
 
 void DisplayHandle::printRadioInfoTask(void *pvParameters) {
     DisplayHandle *displayHandle = static_cast<DisplayHandle*>(pvParameters);
-    RadioHandle radioObject;
-    displayHandle->displayRadioInfo(radioObject);
+    displayHandle->displayRadioInfo();
     vTaskDelete(NULL);
 }
 
@@ -234,11 +229,9 @@ void DisplayHandle::displayBluetoothConnectionStatus() {
     clearAndUpdate();
     display.setCursor(0, 0);
 
-    BluetoothHandle bluetoothHandle;
-
-    if (bluetoothHandle.isConnected()) {
+    if (bluetoothIsConnected()) {
         display.println("Bluetooth Connected");
-        display.printf("Device: %s\n", bluetoothHandle.getDeviceName());
+        display.printf("Device: %s\n", getBluetoothDeviceName());
 
         // display.printf("RSSI: %d dBm\n", bluetoothHandle.getSignalStrength());
     } else {

@@ -30,8 +30,8 @@ public:
     // print methods from other modules
     void displayWiFiNetworks();
     void displayWiFiConnectionStatus();
-    void displayBluetoothInfo(BluetoothHandle &bluetoothObject);
-    void displayRadioInfo(RadioHandle &radioObject);
+    void displayBluetoothInfo();
+    void displayRadioInfo();
     void displayWeatherInfo();
     void displayRDSInfo();
     void displayBluetoothConnectionStatus();
