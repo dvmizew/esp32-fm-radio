@@ -18,6 +18,7 @@ struct WiFiCredentials {
 void scanWiFiNetworks(); // scan for available Wi-Fi networks
 void connectToWiFiNetwork(const char* ssid, const char* password); // connect to a Wi-Fi network
 void printWiFiConnectionStatus(); // print Wi-Fi connection status
+void printWiFiConnectionDetails(); // print Wi-Fi connection details
 void addWiFiCredentials(WiFiCredentials* savedNetworks, uint8_t* savedNetworksCount, uint8_t* nextID, const char* ssid, const char* password); // add Wi-Fi credentials to the array
 void removeWiFiCredentials(WiFiCredentials* savedNetworks, uint8_t* savedNetworksCount, const char* ssid); // remove Wi-Fi credentials from the array
 void printSavedWiFiCredentials(const WiFiCredentials* savedNetworks, uint8_t savedNetworksCount); // list all saved Wi-Fi credentials

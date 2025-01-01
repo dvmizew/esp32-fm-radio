@@ -1,6 +1,6 @@
 #include "wifiHandle.h"
 
-void printWiFiStatus() {
+void printWiFiConnectionDetails() {
     Serial.printf_P(PSTR("Connected to %s\n"), WiFi.SSID().c_str());
     Serial.printf_P(PSTR("IP address: %s\n"), WiFi.localIP().toString().c_str());
     Serial.printf_P(PSTR("RSSI: %d dBm\n"), WiFi.RSSI());
@@ -35,7 +35,7 @@ void connectToWiFiNetwork(const char* ssid, const char* password) {
 
 void printWiFiConnectionStatus() {
     if (WiFi.status() == WL_CONNECTED) {
-        printWiFiStatus();
+        printWiFiConnectionDetails();
     } else {
         Serial.println(F("Wi-Fi not connected."));
     }
