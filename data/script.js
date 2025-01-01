@@ -15,67 +15,57 @@ function toggleBluetooth() {
 }
 
 function changeStation(increase) {
-    fetch(`/change_station?increase=${increase}`)
-        .then(response => response.json())
+    const endpoint = increase ? '/increaseFrequency' : '/decreaseFrequency';
+    fetch(endpoint)
+        .then(response => response.text())
         .then(data => {
-            document.getElementById('frequency').innerText = data.frequency;
+            console.log(data);
+            fetchCurrentFrequency();
         });
 }
 
 function adjustVolume(increase) {
-    fetch(`/adjust_volume?increase=${increase}`)
-        .then(response => response.json())
+    const endpoint = increase ? '/volumeUp' : '/volumeDown';
+    fetch(endpoint)
+        .then(response => response.text())
         .then(data => {
-            document.getElementById('volume').innerText = data.volume;
+            console.log(data);
+            fetchCurrentVolume();
         });
 }
 
-function fetchRDSInfo() {
-    fetch('/rds')
-        .then(response => response.json())
+function fetchCurrentFrequency() {
+    fetch('/getFrequency')
+        .then(response => response.text())
         .then(data => {
-            document.getElementById('rds-info').innerText = data.info;
+            document.getElementById('frequency').innerText = data;
         });
 }
 
-function fetchWeather() {
-    fetch('/weather')
-        .then(response => response.json())
+function fetchCurrentVolume() {
+    fetch('/getVolume')
+        .then(response => response.text())
         .then(data => {
-            document.getElementById('weather-info').innerText = data.weather;
-        });
-}
-
-function connectToInternetRadio() {
-    fetch('/connect')
-        .then(response => response.json())
-        .then(data => {
-            alert(data.message);
-        });
-}
-
-function fetchSignalStrength() {
-    fetch('/get_signal_strength')
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('signal-strength').innerText = data.signalStrength;
+            document.getElementById('volume').innerText = data;
         });
 }
 
 function setFrequency() {
     const frequency = document.getElementById('frequency-input').value;
-    fetch(`/set_frequency?frequency=${frequency}`)
-        .then(response => response.json())
+    fetch(`/setFrequency?freq=${frequency}`)
+        .then(response => response.text())
         .then(data => {
-            document.getElementById('frequency').innerText = data.frequency;
+            console.log(data);
+            fetchCurrentFrequency();
         });
 }
 
 function setStationFrequency(frequency) {
-    fetch(`/set_frequency?frequency=${frequency}`)
-        .then(response => response.json())
+    fetch(`/setFrequency?freq=${frequency}`)
+        .then(response => response.text())
         .then(data => {
-            document.getElementById('frequency').innerText = data.frequency;
+            console.log(data);
+            fetchCurrentFrequency();
         });
 }
 
@@ -108,6 +98,7 @@ function volumeUp() {
         .then(response => response.text())
         .then(data => {
             console.log(data);
+            fetchCurrentVolume();
         });
 }
 
@@ -116,6 +107,7 @@ function volumeDown() {
         .then(response => response.text())
         .then(data => {
             console.log(data);
+            fetchCurrentVolume();
         });
 }
 
@@ -145,3 +137,8 @@ function restartESP() {
             alert('Failed to restart ESP32');
         });
 }
+
+document.addEventListener('DOMContentLoaded', (event) => {
+    fetchCurrentFrequency();
+    fetchCurrentVolume();
+});

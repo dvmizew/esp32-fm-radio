@@ -96,6 +96,10 @@ void setupWebServer() {
             }
         });
 
+        server.on("/getFrequency", HTTP_GET, [](AsyncWebServerRequest *request){
+            request->send(200, "text/plain", String(getFrequency()));
+        });
+
         server.on("/playNextTrack", HTTP_GET, [](AsyncWebServerRequest *request){
             playNextTrack();
             request->send(200, "text/plain", "Next track");
