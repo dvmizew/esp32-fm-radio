@@ -13,6 +13,12 @@
 #include "bluetooth.h" // for printing bluetooth connection status
 #include "radioHandle.h" // for printing radio information
 
+#define I2C_FREQUENCY 400000
+#define DISPLAY_WIDTH 128
+#define DISPLAY_HEIGHT 64
+#define TEXT_SIZE_SMALL 1
+#define TEXT_SIZE_LARGE 2
+
 class DisplayHandle {
 public:
     DisplayHandle();

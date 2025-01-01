@@ -2,18 +2,18 @@
 
 DisplayHandle::DisplayHandle()
     : I2C_display(1), // I2C bus 1
-      display(128, 64, &I2C_display), // 128x64 display
+      display(DISPLAY_WIDTH, DISPLAY_HEIGHT, &I2C_display), // 128x64 display
       displayInitialized(false) {} // we init the display in the main program
 
 void DisplayHandle::initDisplay() {
-    I2C_display.begin(DISPLAY_SDA_PIN, DISPLAY_SCL_PIN, 400000); // start I2C bus with SDA and SCL pins
+    I2C_display.begin(DISPLAY_SDA_PIN, DISPLAY_SCL_PIN, I2C_FREQUENCY); // start I2C bus with SDA and SCL pins
     if (!display.begin(SSD1306_SWITCHCAPVCC, SSD1306_I2C_ADDRESS)) {
         Serial.println(F("Error initializing display!"));
         while(true);
     }
 
     display.clearDisplay(); // clear display buffer
-    display.setTextSize(1);
+    display.setTextSize(TEXT_SIZE_SMALL);
     display.setTextColor(SSD1306_WHITE);
     displayInitialized = true;
 }
@@ -21,11 +21,7 @@ void DisplayHandle::initDisplay() {
 void DisplayHandle::displayCustomMessage(const char *message) {
     clearAndUpdate();
     display.setCursor(0, 0);
-    if (strlen(message) > 16) {
-        display.setTextSize(1);
-    } else {
-       display.setTextSize(2);
-    }
+    display.setTextSize(strlen(message) > 16 ? 1 : 2);
     display.println(message);
     display.display();
 }
@@ -60,11 +56,10 @@ void DisplayHandle::printDateTimeTask(void *pvParameters) {
 }
 
 void DisplayHandle::startPrintDateTimeTask() {
-    xTaskCreate(&DisplayHandle::printDateTimeTask, "DateTimeTask", 4096, this, 1, NULL);
+    xTaskCreate(&DisplayHandle::printDateTimeTask, "DateTimeTask", 2048, this, 1, NULL);
 }
 
 void DisplayHandle::displayResourceUsage() {
-    // this function locks the device and doesn't allow other functions to run
     clearAndUpdate();
     display.setCursor(0, 0);
 
@@ -95,7 +90,7 @@ void DisplayHandle::printResourceUsageTask(void *pvParameters) {
 }
 
 void DisplayHandle::startPrintResourceUsageTask() {
-    xTaskCreate(&DisplayHandle::printResourceUsageTask, "ResourceUsageTask", 4096, this, 1, NULL);
+    xTaskCreate(&DisplayHandle::printResourceUsageTask, "ResourceUsageTask", 2048, this, 1, NULL);
 }
 
 void DisplayHandle::displaySystemInfo() {
@@ -189,7 +184,7 @@ void DisplayHandle::printBluetoothInfoTask(void *pvParameters) {
 }
 
 void DisplayHandle::startPrintBluetoothInfoTask() {
-    xTaskCreate(&DisplayHandle::printBluetoothInfoTask, "BluetoothInfoTask", 4096, this, 1, NULL);
+    xTaskCreate(&DisplayHandle::printBluetoothInfoTask, "BluetoothInfoTask", 2048, this, 1, NULL);
 }
 
 void DisplayHandle::displayRadioInfo() {
@@ -214,7 +209,7 @@ void DisplayHandle::printRadioInfoTask(void *pvParameters) {
 }
 
 void DisplayHandle::startPrintRadioInfoTask() {
-    xTaskCreate(&DisplayHandle::printRadioInfoTask, "RadioInfoTask", 4096, this, 1, NULL);
+    xTaskCreate(&DisplayHandle::printRadioInfoTask, "RadioInfoTask", 2048, this, 1, NULL);
 }
 
 void DisplayHandle::displayWeatherInfo() {
