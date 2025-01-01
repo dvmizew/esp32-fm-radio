@@ -125,6 +125,12 @@ void setupWebServer() {
             request->send(200, "text/plain", String(getSignalLevel()));
         });
 
+        server.on("/restart", HTTP_GET, [](AsyncWebServerRequest *request){
+            request->send(200, "text/plain", "Restarting...");
+            delay(1000); // 1 second delay
+            restartESP();
+        });
+
         server.begin();
         Serial.println(F("Web server started"));
     } else 
