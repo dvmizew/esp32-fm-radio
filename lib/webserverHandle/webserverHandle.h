@@ -1,21 +1,18 @@
 #ifndef WEB_SERVER_HANDLE_H
 #define WEB_SERVER_HANDLE_H
 
-#include <ESPAsyncWebServer.h>
-#include <SPIFFS.h>
-#include <FS.h>
-#include <AsyncTCP.h>
+#include <ESPAsyncWebServer.h> // for web server (main library)
+#include <SPIFFS.h> // for saving the web interface files
+#include <FS.h> // file system
+#include <AsyncTCP.h> // for TCP connection
+#include "wifiHandle.h" // for network connection
+#include "radioHandle.h" // for radio control
+#include "bluetooth.h" // for Bluetooth control
 
-class WebServerHandle {
-public:
-    WebServerHandle();
-    ~WebServerHandle() = default;
-    
-    void initSPIFFS();
-    void setupWebServer();
+extern AsyncWebServer server;
 
-private:
-    AsyncWebServer server;
-};
+void connectToWifi();
+void initSPIFFS();
+void setupWebServer();
 
 #endif

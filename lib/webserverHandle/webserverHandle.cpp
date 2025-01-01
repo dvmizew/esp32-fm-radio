@@ -1,11 +1,15 @@
 #include "webserverHandle.h"
-#include "radioHandle.h"
 
-RadioHandle radioHandle;
+AsyncWebServer server(80);
 
-WebServerHandle::WebServerHandle() : server(80) {}
+void connectToWifi() {
+    if (!isWiFiConnected()) {
+        connectToWiFiNetwork("ssid", "password"); // replace with your Wi-Fi credentials
+    }
+    Serial.printf_P(PSTR("\nConnected to Wi-Fi\nClick here to open the web interface: http://%s\n\n"), WiFi.localIP().toString().c_str());
+}
 
-void WebServerHandle::initSPIFFS() {
+void initSPIFFS() {
     if (!SPIFFS.begin(true)) {
         Serial.println(F("An error has occurred while mounting SPIFFS"));
         if (SPIFFS.format()) {
@@ -18,72 +22,111 @@ void WebServerHandle::initSPIFFS() {
     }
 }
 
-void WebServerHandle::setupWebServer() {
-    radioHandle.initRadio();
-    Serial.println(F("Setting up web server..."));
-    server.serveStatic("/", SPIFFS, "/").setDefaultFile("index.html");
+void setupWebServer() {
+    connectToWifi();
+    initSPIFFS();
+    if (isWiFiConnected()) {
+        Serial.println(F("Setting up web server..."));
+        server.serveStatic("/", SPIFFS, "/").setDefaultFile("index.html");
 
-    if (!SPIFFS.exists("/index.html")) {
-        Serial.println(F("index.html doesn't exist"));
-        Serial.println(F("You can use the following command to upload the file to SPIFFS:"));
-        Serial.println(F("pio run -t uploadfs"));
-    } else {
-        Serial.println(F("index.html exists and will be served"));
-    }
-
-    server.on("/change_station", HTTP_GET, [](AsyncWebServerRequest *request){
-        bool increase = request->getParam("increase")->value() == "true";
-        if (increase) {
-            radioHandle.increaseFrequency();
+        if (!SPIFFS.exists("/index.html")) {
+            Serial.println(F("index.html doesn't exist"));
+            Serial.println(F("You can use the following command to upload the file to SPIFFS:"));
+            Serial.println(F("pio run -t uploadfs"));
         } else {
-            radioHandle.decreaseFrequency();
+            Serial.println(F("index.html exists and will be served"));
         }
-        String response = "{\"frequency\": \"" + String(radioHandle.getFrequency()) + "\"}";
-        request->send(200, "application/json", response);
-    });
 
-    server.on("/adjust_volume", HTTP_GET, [](AsyncWebServerRequest *request){
-        bool increase = request->getParam("increase")->value() == "true";
-        int newVolume = increase ? 6 : 4;
-        String response = "{\"volume\": \"" + String(newVolume) + "\"}";
-        request->send(200, "application/json", response);
-    });
+        static bool radioEnabled = false;
+        static bool bluetoothEnabled = false;
 
-    server.on("/rds", HTTP_GET, [](AsyncWebServerRequest *request){
-        String rdsInfo = "Example RDS Info";
-        String response = "{\"info\": \"" + rdsInfo + "\"}";
-        request->send(200, "application/json", response);
-    });
+        server.on("/toggleRadio", HTTP_GET, [](AsyncWebServerRequest *request){
+            radioEnabled = !radioEnabled;
+            if (radioEnabled) {
+                if (bluetoothEnabled) {
+                    disableBluetoothSpeaker();
+                    bluetoothEnabled = false;
+                    Serial.println(F("Bluetooth disabled"));
+                }
+                enableRadio();
+                request->send(200, "text/plain", "Radio enabled");
+                Serial.println(F("Radio enabled"));
+            } else {
+                disableRadio();
+                request->send(200, "text/plain", "Radio disabled");
+                Serial.println(F("Radio disabled"));
+            }
+        });
 
-    server.on("/weather", HTTP_GET, [](AsyncWebServerRequest *request){
-        String weatherInfo = "Sunny, 25°C";
-        String response = "{\"weather\": \"" + weatherInfo + "\"}";
-        request->send(200, "application/json", response);
-    });
+        server.on("/toggleBluetooth", HTTP_GET, [](AsyncWebServerRequest *request){
+            bluetoothEnabled = !bluetoothEnabled;
+            if (bluetoothEnabled) {
+                if (radioEnabled) {
+                    disableRadio();
+                    radioEnabled = false;
+                    Serial.println(F("Radio disabled"));
+                }
+                initializeBluetoothSpeaker();
+                request->send(200, "text/plain", "Bluetooth enabled");
+                Serial.println(F("Bluetooth enabled"));
+            } else {
+                disableBluetoothSpeaker();
+                request->send(200, "text/plain", "Bluetooth disabled");
+                Serial.println(F("Bluetooth disabled"));
+            }
+        });
 
-    server.on("/connect", HTTP_GET, [](AsyncWebServerRequest *request){
-        String message = "Connected to Internet Radio";
-        String response = "{\"message\": \"" + message + "\"}";
-        request->send(200, "application/json", response);
-    });
+        server.on("/increaseFrequency", HTTP_GET, [](AsyncWebServerRequest *request){
+            increaseRadioFrequency();
+            request->send(200, "text/plain", "Frequency increased");
+        });
 
-    server.on("/get_signal_strength", HTTP_GET, [](AsyncWebServerRequest *request){
-        short signalStrength = radioHandle.getSignalLevel();
-        String response = "{\"signalStrength\": \"" + String(signalStrength) + "\"}";
-        request->send(200, "application/json", response);
-    });
+        server.on("/decreaseFrequency", HTTP_GET, [](AsyncWebServerRequest *request){
+            decreaseRadioFrequency();
+            request->send(200, "text/plain", "Frequency decreased");
+        });
 
-    server.on("/set_frequency", HTTP_GET, [](AsyncWebServerRequest *request){
-        String freqParam = request->getParam("frequency")->value();
-        float frequency = freqParam.toFloat();
-        radioHandle.setFrequency(frequency);
-        String response = "{\"frequency\": \"" + String(radioHandle.getFrequency()) + "\"}";
-        request->send(200, "application/json", response);
-    });
+        server.on("/setFrequency", HTTP_GET, [](AsyncWebServerRequest *request){
+            if (request->hasParam("freq")) {
+                String freq = request->getParam("freq")->value();
+                setRadioFrequency(freq.toFloat());
+                request->send(200, "text/plain", "Frequency set to " + freq);
+            } else {
+                request->send(400, "text/plain", "Frequency parameter missing");
+            }
+        });
 
-    server.onNotFound([](AsyncWebServerRequest *request){
-        request->send(404, "text/plain", "Not found");
-    });
+        server.on("/playNextTrack", HTTP_GET, [](AsyncWebServerRequest *request){
+            playNextTrack();
+            request->send(200, "text/plain", "Next track");
+        });
 
-    server.begin();
+        server.on("/playPreviousTrack", HTTP_GET, [](AsyncWebServerRequest *request){
+            playPreviousTrack();
+            request->send(200, "text/plain", "Previous track");
+        });
+
+        server.on("/togglePlayback", HTTP_GET, [](AsyncWebServerRequest *request){
+            togglePlayback();
+            request->send(200, "text/plain", "Playback toggled");
+        });
+
+        server.on("/volumeUp", HTTP_GET, [](AsyncWebServerRequest *request){
+            volumeUp();
+            request->send(200, "text/plain", "Volume increased");
+        });
+
+        server.on("/volumeDown", HTTP_GET, [](AsyncWebServerRequest *request){
+            volumeDown();
+            request->send(200, "text/plain", "Volume decreased");
+        });
+
+        server.on("/getSignalLevel", HTTP_GET, [](AsyncWebServerRequest *request){
+            request->send(200, "text/plain", String(getSignalLevel()));
+        });
+
+        server.begin();
+        Serial.println(F("Web server started"));
+    } else 
+        Serial.println(F("No internet connection, so the Web Server couldn't start!"));
 }
