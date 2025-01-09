@@ -74,7 +74,8 @@ void initializeBluetoothSpeaker() {
         
         // for controlling the bluetooth audio sink using the buttons
         // you can control the volume, toggle playback and go to the next/previous track
-        handleBluetoothControl();
+        // handleBluetoothControl();
+        startHandleBluetoothControlTask();
     }
 }
 
@@ -179,16 +180,16 @@ void handleBluetoothControl() {
     }
 }
 
-// void handleBluetoothControlTask(void *pvParameters) {
-//     while (true) {
-//         handleBluetoothControl();
-//     }
-//     vTaskDelete(NULL);
-// }
+void handleBluetoothControlTask(void *pvParameters) {
+    while (true) {
+        handleBluetoothControl();
+    }
+    vTaskDelete(NULL);
+}
 
-// void startHandleBluetoothControlTask() {
-//     xTaskCreate(&handleBluetoothControlTask, "BluetoothControlTask", 2048, NULL, 1, NULL);
-// }
+void startHandleBluetoothControlTask() {
+    xTaskCreate(&handleBluetoothControlTask, "BluetoothControlTask", 2048, NULL, 1, NULL);
+}
 
 bool bluetoothIsConnected() {
     return connected;

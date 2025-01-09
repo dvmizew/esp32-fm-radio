@@ -31,8 +31,8 @@ void volumeUp(); // increase the volume
 void volumeDown(); // decrease the volume
 void volumeChange(int volume); // change the volume
 void handleBluetoothControl(); // handle Bluetooth control using the buttons
-// void handleBluetoothControlTask(void *pvParameters); // task to handle Bluetooth control
-// void startHandleBluetoothControlTask(); // start Bluetooth control task
+void handleBluetoothControlTask(void *pvParameters); // task to handle Bluetooth control
+void startHandleBluetoothControlTask(); // start Bluetooth control task
 
 // getters
 bool bluetoothIsConnected(); // returns true if some a2dp device is connected
