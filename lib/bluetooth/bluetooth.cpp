@@ -74,8 +74,8 @@ void initializeBluetoothSpeaker() {
         
         // for controlling the bluetooth audio sink using the buttons
         // you can control the volume, toggle playback and go to the next/previous track
-        // handleBluetoothControl();
-        startHandleBluetoothControlTask();
+        handleBluetoothControl();
+        // startHandleBluetoothControlTask();
     }
 }
 
@@ -116,7 +116,7 @@ void volumeUp() {
     int volume = btAudioSink.get_volume();
     if (volume < 100) {
         volume += VOL_STEP;
-        btAudioSink.set_volume(volume);
+        volumeChange(volume);
     }
 }
 
@@ -124,13 +124,30 @@ void volumeDown() {
     int volume = btAudioSink.get_volume();
     if (volume > 0) {
         volume -= VOL_STEP;
-        btAudioSink.set_volume(volume);
+        volumeChange(volume);
     }
 }
 
 void volumeChange(int volume) {
     // volume range is 0-100
     btAudioSink.set_volume(volume);
+}
+
+void handleButtonPress(int buttonPin, bool &buttonHeld, unsigned long &buttonPressTime, void (*shortPressAction)(), void (*longPressAction)()) {
+    if (digitalRead(buttonPin) == LOW) {
+        if (!buttonHeld) {
+            buttonPressTime = millis();
+            buttonHeld = true;
+        } else if (millis() - buttonPressTime > BUTTON_HOLD_TIME) {
+            longPressAction();
+            delay(BUTTON_DEBOUNCE_DELAY);
+        }
+    } else {
+        if (buttonHeld && millis() - buttonPressTime <= BUTTON_HOLD_TIME) {
+            shortPressAction();
+        }
+        buttonHeld = false;
+    }
 }
 
 void handleBluetoothControl() {
@@ -145,38 +162,8 @@ void handleBluetoothControl() {
             togglePlayback();
             delay(BUTTON_DEBOUNCE_DELAY);
         }
-        // if the next button is held for 3 seconds, increase the volume
-        // else play the next track
-        if (digitalRead(NEXT_BUTTON) == LOW) {
-            if (!nextButtonHeld) {
-                nextButtonPressTime = millis();
-                nextButtonHeld = true;
-            } else if (millis() - nextButtonPressTime > 3000) {
-                volumeUp();
-                delay(500);
-            }
-        } else {
-            if (nextButtonHeld && millis() - nextButtonPressTime <= 3000) {
-                playNextTrack();
-            }
-            nextButtonHeld = false;
-        }
-        // if the previous button is held for 3 seconds, decrease the volume
-        // else play the previous track
-        if (digitalRead(PREV_BUTTON) == LOW) {
-            if (!prevButtonHeld) {
-                prevButtonPressTime = millis();
-                prevButtonHeld = true;
-            } else if (millis() - prevButtonPressTime > 3000) {
-                volumeDown();
-                delay(500);
-            }
-        } else {
-            if (prevButtonHeld && millis() - prevButtonPressTime <= 3000) {
-                playPreviousTrack();
-            }
-            prevButtonHeld = false;
-        }
+        handleButtonPress(NEXT_BUTTON, nextButtonHeld, nextButtonPressTime, playNextTrack, volumeUp);
+        handleButtonPress(PREV_BUTTON, prevButtonHeld, prevButtonPressTime, playPreviousTrack, volumeDown);
     }
 }
 
