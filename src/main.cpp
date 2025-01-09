@@ -44,7 +44,7 @@ void setup() {
     // }
 
     // Web server testing
-    initSPIFFS();
+    // initSPIFFS();
     setupWebServer();
 
     displayHandle.displayResourceUsage();
