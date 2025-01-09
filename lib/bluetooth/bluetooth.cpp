@@ -71,6 +71,10 @@ void initializeBluetoothSpeaker() {
         btAudioSink.set_auto_reconnect(true, 1000); // auto reconnect after 1 second
         Serial.printf_P(PSTR("%s is now discoverable\n"), DEVICE_NAME);
         bluetoothSpeakerInitialized = true;
+        
+        // for controlling the bluetooth audio sink using the buttons
+        // you can control the volume, toggle playback and go to the next/previous track
+        handleBluetoothControl();
     }
 }
 
@@ -100,7 +104,11 @@ void playPreviousTrack() {
 }
 
 void togglePlayback() {
-    btAudioSink.pause();
+    esp_a2d_audio_state_t audioState = btAudioSink.get_audio_state();
+    if (audioState == ESP_A2D_AUDIO_STATE_STOPPED || audioState == ESP_A2D_AUDIO_STATE_REMOTE_SUSPEND)
+        btAudioSink.play();
+    else if (audioState == ESP_A2D_AUDIO_STATE_STARTED)
+        btAudioSink.pause();
 }
 
 void volumeUp() {
@@ -124,50 +132,63 @@ void volumeChange(int volume) {
     btAudioSink.set_volume(volume);
 }
 
-void joystickHandleBluetoothControl() {
-    // avrcp commands using the joystick
-    JoystickHandle joystick;
-    joystick.setupJoystick();
+void handleBluetoothControl() {
+    setupButtons();
+    unsigned long nextButtonPressTime = 0;
+    unsigned long prevButtonPressTime = 0;
+    bool nextButtonHeld = false;
+    bool prevButtonHeld = false;
 
     while (true) {
-        joystick.readJoystick();
-
-        int x, y;
-        uint8_t sw; // switch
-        joystick.getJoystickValues(x, y, sw);
-
-        // Adjust the threshold values based on the test results
-        const int thresholdLow = 1000;
-        const int thresholdHigh = 3000;
-
-        if (sw == LOW) {
-            // pause/play
-            btAudioSink.pause();
-            Serial.println(F("Pause/Play"));
+        if (digitalRead(PLAY_BUTTON) == LOW) {
+            togglePlayback();
+            delay(BUTTON_DEBOUNCE_DELAY);
         }
-        if (x < thresholdLow) {
-            // previous track
-            btAudioSink.previous();
-            Serial.println(F("Previous track"));
-        } else if (x > thresholdHigh) {
-            // next track
-            btAudioSink.next();
-            Serial.println(F("Next track"));
+        // if the next button is held for 3 seconds, increase the volume
+        // else play the next track
+        if (digitalRead(NEXT_BUTTON) == LOW) {
+            if (!nextButtonHeld) {
+                nextButtonPressTime = millis();
+                nextButtonHeld = true;
+            } else if (millis() - nextButtonPressTime > 3000) {
+                volumeUp();
+                delay(500);
+            }
+        } else {
+            if (nextButtonHeld && millis() - nextButtonPressTime <= 3000) {
+                playNextTrack();
+            }
+            nextButtonHeld = false;
         }
-        vTaskDelay(100 / portTICK_PERIOD_MS); // 100 ms delay
+        // if the previous button is held for 3 seconds, decrease the volume
+        // else play the previous track
+        if (digitalRead(PREV_BUTTON) == LOW) {
+            if (!prevButtonHeld) {
+                prevButtonPressTime = millis();
+                prevButtonHeld = true;
+            } else if (millis() - prevButtonPressTime > 3000) {
+                volumeDown();
+                delay(500);
+            }
+        } else {
+            if (prevButtonHeld && millis() - prevButtonPressTime <= 3000) {
+                playPreviousTrack();
+            }
+            prevButtonHeld = false;
+        }
     }
 }
 
-void handleBluetoothControlTask(void *pvParameters) {
-    while (true) {
-        joystickHandleBluetoothControl();
-    }
-    vTaskDelete(NULL);
-}
+// void handleBluetoothControlTask(void *pvParameters) {
+//     while (true) {
+//         handleBluetoothControl();
+//     }
+//     vTaskDelete(NULL);
+// }
 
-void startHandleBluetoothControlTask() {
-    xTaskCreate(&handleBluetoothControlTask, "BluetoothControlTask", 2048, NULL, 1, NULL);
-}
+// void startHandleBluetoothControlTask() {
+//     xTaskCreate(&handleBluetoothControlTask, "BluetoothControlTask", 2048, NULL, 1, NULL);
+// }
 
 bool bluetoothIsConnected() {
     return connected;
