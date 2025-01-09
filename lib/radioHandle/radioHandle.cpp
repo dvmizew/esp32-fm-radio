@@ -109,35 +109,6 @@ void printRadioStations() {
     }
 }
 
-void joystickRadioControl() {
-    // THIS FUNCTION DOESN'T WORK YET
-    JoystickHandle joystick;
-    joystick.setupJoystick();
-    joystick.readJoystick();
-
-    int x, y;
-    uint8_t sw; // switch
-    joystick.getJoystickValues(x, y, sw);
-
-    if (sw == HIGH) {
-        // toggle mute
-        radio.setMuted(!radio.isMuted());
-    }
-
-    // prevent accidental tuning
-    const int deadZone = 100;
-
-    if (x < (512 - deadZone)) {
-        // tune down
-        Serial.println(F("Tuning down"));
-        radio.previousStation();
-    } else if (x > (512 + deadZone)) {
-        // tune up
-        Serial.println(F("Tuning up"));
-        radio.nextStation();
-    }
-}
-
 int32_t get_sound_data(Frame *data, int32_t frameCount) {
     // this function is supposed to get sound data from TEA5767 using I2S
     // TODO

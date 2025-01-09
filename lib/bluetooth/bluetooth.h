@@ -2,7 +2,6 @@
 #define BLUETOOTH_H
 
 #include "hardware.h"
-#include "joystickHandle.h"
 #include <Wire.h>
 #include <AudioTools.h>
 #include <BluetoothA2DPSink.h>

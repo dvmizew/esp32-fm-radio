@@ -1,6 +1,7 @@
 // #include <Arduino.h>
 #include "displayHandle.h"
 #include "webserverHandle.h"
+#include "hardware.h"
 
 // global objects for testing
 DisplayHandle displayHandle;
@@ -9,11 +10,10 @@ void setup() {
     Serial.begin(115200);
 
     // printSystemInfo();
-    // heapCalculator();
 
     // Display testing
     displayHandle.initDisplay();
-    // displayHandle.displayCustomMessage("X-PERT Production\nCioc Music\nCBX the family\nAlex Botea\n"); // Splash screen
+    displayHandle.displayCustomMessage("X-PERT Production\nCioc Music\nCBX the family\nAlex Botea\n"); // Splash screen
     // delay(2000);
     // displayHandle.printWiFiNetworks();
     // displayHandle.printSystemInfo();
@@ -31,12 +31,13 @@ void setup() {
     // searchRadioStations();
     // printRadioStations();
     // Serial.printf_P(PSTR("Current station: %s\n"), getCurrentStation());
-    // joystick.testJoystick();
-    // handleRadioControl(); // THIS FUNCTION DOESN'T WORK YET
     // blinkInternalLED();
 
     // Bluetooth testing
-    // initializeBluetoothSpeaker();
+    initializeBluetoothSpeaker();
+    // displayHandle.displayPrintBluetoothInfoTask();
+    displayHandle.displayBluetoothConnectionStatus();
+    // testButtons();
 
     // if (bluetoothIsConnected()) {
     //     Serial.println(F("Bluetooth connected."));
@@ -45,9 +46,9 @@ void setup() {
 
     // Web server testing
     // initSPIFFS();
-    setupWebServer();
+    // setupWebServer();
 
-    displayHandle.displayResourceUsage();
+    // displayHandle.displayResourceUsage();
     // displayHandle.displayWiFiConnectionStatus();
 }
 

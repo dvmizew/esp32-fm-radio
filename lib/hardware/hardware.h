@@ -17,11 +17,6 @@
 
 #define BUTTON_DEBOUNCE_DELAY 200
 
-// joystick pins
-#define JOYSTICK_X 27
-#define JOYSTICK_Y 26
-#define JOYSTICK_SW 32
-
 // OLED display pins (I2C)
 #define DISPLAY_SDA_PIN 21
 #define DISPLAY_SCL_PIN 22
