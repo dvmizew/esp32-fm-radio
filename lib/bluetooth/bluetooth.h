@@ -9,7 +9,6 @@
 // #include <Audio.h>
 
 #define VOL_STEP 5
-#define BUTTON_HOLD_TIME 3000 // 3 seconds for volume control
 
 // global variables
 extern I2SStream i2s; // for configuring the I2S stream for the amplifier

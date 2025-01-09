@@ -133,23 +133,6 @@ void volumeChange(int volume) {
     btAudioSink.set_volume(volume);
 }
 
-void handleButtonPress(int buttonPin, bool &buttonHeld, unsigned long &buttonPressTime, void (*shortPressAction)(), void (*longPressAction)()) {
-    if (digitalRead(buttonPin) == LOW) {
-        if (!buttonHeld) {
-            buttonPressTime = millis();
-            buttonHeld = true;
-        } else if (millis() - buttonPressTime > BUTTON_HOLD_TIME) {
-            longPressAction();
-            delay(BUTTON_DEBOUNCE_DELAY);
-        }
-    } else {
-        if (buttonHeld && millis() - buttonPressTime <= BUTTON_HOLD_TIME) {
-            shortPressAction();
-        }
-        buttonHeld = false;
-    }
-}
-
 void handleBluetoothControl() {
     setupButtons();
     unsigned long nextButtonPressTime = 0;

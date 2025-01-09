@@ -16,6 +16,7 @@
 #define PREV_BUTTON 34 // also used for volume down
 
 #define BUTTON_DEBOUNCE_DELAY 200
+#define BUTTON_HOLD_TIME 3000 // 3 seconds for volume control
 
 // OLED display pins (I2C)
 #define DISPLAY_SDA_PIN 21
@@ -38,6 +39,7 @@ extern i2s_pin_config_t amp_config;
 
 // function prototypes
 void setupButtons();
+void handleButtonPress(int button, bool &buttonHeld, unsigned long &buttonPressTime, void (*longPressAction)(), void (*shortPressAction)());
 void testButtons();
 void restartESP();
 void blinkInternalLED();
