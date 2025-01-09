@@ -1,5 +1,27 @@
 #include "hardware.h"
 
+void setupButtons() {
+    pinMode(PLAY_BUTTON, INPUT_PULLUP);
+    pinMode(NEXT_BUTTON, INPUT_PULLUP);
+    pinMode(PREV_BUTTON, INPUT_PULLUP);
+}
+
+void testButtons() {
+    setupButtons();
+    while (true) {
+        if (digitalRead(PLAY_BUTTON) == LOW) {
+            Serial.println(F("Play button pressed"));
+        }
+        if (digitalRead(NEXT_BUTTON) == LOW) {
+            Serial.println(F("Next button pressed"));
+        }
+        if (digitalRead(PREV_BUTTON) == LOW) {
+            Serial.println(F("Prev button pressed"));
+        }
+        delay(100);
+    }
+}
+
 i2s_config_t amp_i2s_config = {
     .mode = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_TX), // enable TX mode
     .sample_rate = 44100,

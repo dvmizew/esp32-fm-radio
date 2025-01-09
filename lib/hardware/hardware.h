@@ -10,6 +10,13 @@
 // pin definitions
 #define INTERNAL_LED 2
 
+// button pins
+#define PLAY_BUTTON 35 // also used for mute toggle for radio
+#define NEXT_BUTTON 32 // also used for volume up
+#define PREV_BUTTON 34 // also used for volume down
+
+#define BUTTON_DEBOUNCE_DELAY 200
+
 // joystick pins
 #define JOYSTICK_X 27
 #define JOYSTICK_Y 26
@@ -35,6 +42,8 @@ extern i2s_pin_config_t amp_config;
 #define TEA5767_SCL 16
 
 // function prototypes
+void setupButtons();
+void testButtons();
 void restartESP();
 void blinkInternalLED();
 void printI2CDevices();
