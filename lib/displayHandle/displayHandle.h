@@ -53,7 +53,7 @@ public:
     void displayPrintResourceUsageTask();
     void displayPrintDateTimeTask();
     void displayPrintBluetoothInfoTask();
-    void displayPrintRadioInfoTask();
+    void startRadioInfoDisplayTask();
 
     // getter
     bool isDisplayInitialized() const;

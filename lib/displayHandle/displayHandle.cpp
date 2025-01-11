@@ -168,9 +168,11 @@ void DisplayHandle::displayBluetoothInfo() {
     while (true) {
         display.clearDisplay();
         display.setCursor(0, 0);
-        display.println("Bluetooth Info");
-        display.printf("This Device: \n%s\n", getBluetoothDeviceName());
-        display.printf("Connected: %s\n", bluetoothIsConnected ? "Yes" : "No");
+        display.printf("%s\n\n", getBluetoothDeviceName());
+        display.printf("Connected: %s\n", bluetoothIsConnected() ? "Yes" : "No");
+        display.printf("Title: %s\n", currentTitle.c_str());
+        display.printf("Artist: %s\n", currentArtist.c_str());
+        display.printf("Album: %s\n", currentAlbum.c_str());
 
         display.display();
         vTaskDelay(1000 / portTICK_PERIOD_MS); // 1 second delay
@@ -191,6 +193,8 @@ void DisplayHandle::displayRadioInfo() {
     clearAndUpdate();
 
     while (true) {
+        display.clearDisplay();
+        display.setCursor(0, 0);
         display.println("Radio Info");
         display.printf("Station: %s\n", getCurrentStation());
         display.printf("Frequency: %.1f FM\n", getFrequency());
@@ -207,7 +211,7 @@ void DisplayHandle::displayRadioInfoTask(void *pvParameters) {
     vTaskDelete(NULL);
 }
 
-void DisplayHandle::displayPrintRadioInfoTask() {
+void DisplayHandle::startRadioInfoDisplayTask() {
     xTaskCreate(&DisplayHandle::displayRadioInfoTask, "RadioInfoTask", 2048, this, 1, NULL);
 }
 
