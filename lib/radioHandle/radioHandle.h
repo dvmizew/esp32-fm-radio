@@ -22,6 +22,8 @@ void initRadio();
 void enableRadio();
 void disableRadio();
 void signalStrengthLED(); // lights up the internal LED based on the signal strength
+void handleRadioControl(); // handles radio control using the buttons
+void handleRadioControlTask(void *parameter); // task to handle radio control multithreaded
 void increaseRadioFrequency();
 void decreaseRadioFrequency();
 void setRadioFrequency(float freq);

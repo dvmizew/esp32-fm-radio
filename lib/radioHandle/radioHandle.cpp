@@ -4,6 +4,7 @@ static char currentStation[10] = "107.5 FM";
 static float frequency = 107.5;
 static radioStation stations[MAX_RADIO_STATIONS]; // array of radio stations found during search
 static TEA5767 radio;
+static TaskHandle_t radioControlTaskHandle = NULL;
 
 void setupRadio() {
     // start I2C bus with radio pins
@@ -24,6 +25,9 @@ void enableRadio() {
     initRadio();
     radio.setMuted(false);
     radio.setStandby(false);
+    if (radioControlTaskHandle == NULL) {
+        xTaskCreate(handleRadioControlTask, "RadioControlTask", 2048, NULL, 1, &radioControlTaskHandle);
+    }
 }
 
 void disableRadio() {
@@ -52,6 +56,35 @@ void signalStrengthLED() {
         analogWrite(INTERNAL_LED, brightness);
         delay(100);
     }
+}
+
+void handleRadioControl() {
+    setupButtons();
+    unsigned long nextButtonPressTime = 0;
+    unsigned long prevButtonPressTime = 0;
+    bool nextButtonHeld = false;
+    bool prevButtonHeld = false;
+    bool radioEnabled = true;
+
+    while (true) {
+        if (digitalRead(PLAY_BUTTON) == LOW) {
+            if (radioEnabled) {
+                disableRadio();
+            } else {
+                enableRadio();
+            }
+            radioEnabled = !radioEnabled;
+            vTaskDelay(pdMS_TO_TICKS(BUTTON_DEBOUNCE_DELAY));
+        }
+        handleButtonPress(NEXT_BUTTON, nextButtonHeld, nextButtonPressTime, increaseRadioFrequency, volumeUp);
+        handleButtonPress(PREV_BUTTON, prevButtonHeld, prevButtonPressTime, decreaseRadioFrequency, volumeDown);
+        vTaskDelay(pdMS_TO_TICKS(10));
+    }
+}
+
+void handleRadioControlTask(void *parameter) {
+    handleRadioControl();
+    vTaskDelete(NULL); // delete the task when done
 }
 
 void increaseRadioFrequency() {
