@@ -27,7 +27,7 @@ void setupWebServer() {
     initSPIFFS();
     if (isWiFiConnected()) {
         Serial.println(F("Setting up web server..."));
-        server.serveStatic("/", SPIFFS, "/").setDefaultFile("index.html");
+        server.serveStatic("/", SPIFFS, "/").setDefaultFile("index.html").setCacheControl("max-age=3600");
 
         if (!SPIFFS.exists("/index.html")) {
             Serial.println(F("index.html doesn't exist"));
