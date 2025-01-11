@@ -1,72 +1,56 @@
 #include "bluetooth.h"
 
-// global variables
 I2SStream i2s; // for configuring the I2S stream for the amplifier
-BluetoothA2DPSink btAudioSink(i2s); // use ESP32 as speaker
-// Audio audio; // for tone control
-// BluetoothA2DPSource btAudioSource; // play through an external speaker
+BluetoothA2DPSink btAudioSink(i2s); // use ESP32 as a speaker using the I2S stream
 bool connected = false;
 bool bluetoothSpeakerInitialized = false;
 const char* deviceName = DEVICE_NAME;
+
+TaskHandle_t bluetoothControlTaskHandle = nullptr;
+
+// global variables to store metadata
+String currentTitle = "";
+String currentArtist = "";
+String currentAlbum = "";
 
 void initializeBluetoothSpeaker() {
     if (!bluetoothSpeakerInitialized) {
         Serial.println(F("Initializing Bluetooth speaker..."));
 
-        Serial.begin(115200);
+        Serial.printf(PSTR("Heap before Bluetooth init: %u\n"), ESP.getFreeHeap());
 
-        // old way, sounds better but crashes after a while
-        // audio.setPinout(AMP_BLCK, AMP_LRC, AMP_DIN);
-        // audio.setVolume(100);
-
-        // initialize I2SStream
-        auto cfg = i2s.defaultConfig(); // get the default configuration for I2S
-        cfg.pin_bck = AMP_BLCK; // set the bit clock pin
-        cfg.pin_ws = AMP_LRC; // set the word select pin
-        cfg.pin_data = AMP_DIN; // set the data pin
-        cfg.bits_per_sample = I2S_BITS_PER_SAMPLE_16BIT; // set the bits per sample
-        cfg.channel_format = I2S_CHANNEL_FMT_RIGHT_LEFT; // set the channel format
-        cfg.use_apll = false;
+        auto cfg = i2s.defaultConfig();
+        cfg.pin_bck = AMP_BLCK;
+        cfg.pin_ws = AMP_LRC;
+        cfg.pin_data = AMP_DIN;
+        cfg.bits_per_sample = I2S_BITS_PER_SAMPLE_16BIT;
+        cfg.channel_format = I2S_CHANNEL_FMT_RIGHT_LEFT;
+        cfg.use_apll = true;
         i2s.begin(cfg);
 
-        // hopefully this will make the sound better
-        // set it to 0 to disable, 100 to max
-        // const int8_t gainLowPass = 5;   // increase bass
-        // const int8_t gainBandPass = 3;  // mid-range
-        // const int8_t gainHighPass = 4;  // increase treble
-        // audio.setTone(gainLowPass, gainBandPass, gainHighPass);
-
+        Serial.println(F("Starting Bluetooth audio sink..."));
         btAudioSink.start(deviceName); // start the Bluetooth audio sink and now it's discoverable
 
         // getting metadata from A2DP source (external device)
         btAudioSink.set_avrc_metadata_callback([](uint8_t id, const uint8_t *value) {
-            if (value == nullptr || strlen((const char *)value) == 0) {
-                return;
+            if (value && strlen((const char *)value)) {
+                switch (id) {
+                    case ESP_AVRC_MD_ATTR_TITLE:
+                        currentTitle = (const char *)value;
+                        Serial.printf_P(PSTR("Title: %s\n"), value);
+                        break;
+                    case ESP_AVRC_MD_ATTR_ARTIST:
+                        currentArtist = (const char *)value;
+                        Serial.printf_P(PSTR("Artist: %s\n"), value);
+                        break;
+                    case ESP_AVRC_MD_ATTR_ALBUM:
+                        currentAlbum = (const char *)value;
+                        Serial.printf_P(PSTR("Album: %s\n"), value);
+                        break;
+                    default:
+                        break;
+                }
             }
-
-            switch (id) {
-                case ESP_AVRC_MD_ATTR_TITLE:
-                    Serial.print(F("Title: "));
-                    break;
-                case ESP_AVRC_MD_ATTR_ARTIST:
-                    Serial.print(F("Artist: "));
-                    break;
-                case ESP_AVRC_MD_ATTR_ALBUM:
-                    Serial.print(F("Album: "));
-                    break;
-                case ESP_AVRC_MD_ATTR_GENRE:
-                    Serial.print(F("Genre: "));
-                    break;
-                case ESP_AVRC_MD_ATTR_PLAYING_TIME:
-                    Serial.print(F("Playing time: "));
-                    break;
-                case ESP_AVRC_MD_ATTR_TRACK_NUM:
-                    Serial.print(F("Track number: "));
-                    break;
-                default:
-                    return;
-            }
-            Serial.println((const char *)value);
         });
 
         btAudioSink.set_avrc_connection_state_callback(connectionStateCallback);
@@ -76,21 +60,52 @@ void initializeBluetoothSpeaker() {
         
         // for controlling the bluetooth audio sink using the buttons
         // you can control the volume, toggle playback and go to the next/previous track
-        // handleBluetoothControl();
         startHandleBluetoothControlTask();
+        Serial.printf("Heap after Bluetooth init: %u\n", ESP.getFreeHeap());
     } else {
         Serial.println(F("Bluetooth speaker already initialized"));
     }
 }
 
+void startHandleBluetoothControlTask() {
+    if (bluetoothControlTaskHandle == nullptr) {
+        xTaskCreatePinnedToCore(
+            handleBluetoothControlTask,
+            "BluetoothControlTask",
+            2048,
+            nullptr,
+            1,
+            &bluetoothControlTaskHandle,
+            1 // assign to Core 1
+        );
+    }
+}
+
+void handleBluetoothControlTask(void *pvParameters) {
+    handleBluetoothControl();
+    vTaskDelete(nullptr);
+    bluetoothControlTaskHandle = nullptr;
+}
+
 void deinitializeBluetoothSpeaker() {
     if (bluetoothSpeakerInitialized) {
         Serial.println(F("Stopping Bluetooth audio sink..."));
+
+        if (bluetoothControlTaskHandle != nullptr) {
+            vTaskDelete(bluetoothControlTaskHandle);
+            bluetoothControlTaskHandle = nullptr;
+        }
+
         btAudioSink.end();
         Serial.println(F("Stopping I2S..."));
         i2s.end();
+
+        esp_bt_controller_disable(); // reset the Bluetooth stack
+        esp_bt_controller_enable(ESP_BT_MODE_CLASSIC_BT);
+
         bluetoothSpeakerInitialized = false;
-        Serial.println(F("Bluetooth speaker deinitialized"));
+
+        Serial.printf("Heap after Bluetooth deinit: %u\n", ESP.getFreeHeap());
     } else {
         Serial.println(F("Bluetooth speaker was not initialized"));
     }
@@ -158,15 +173,6 @@ void handleBluetoothControl() {
         handleButtonPress(PREV_BUTTON, prevButtonHeld, prevButtonPressTime, playPreviousTrack, volumeDown);
         vTaskDelay(pdMS_TO_TICKS(10));
     }
-}
-
-void handleBluetoothControlTask(void *pvParameters) {
-    handleBluetoothControl();
-    vTaskDelete(NULL);
-}
-
-void startHandleBluetoothControlTask() {
-    xTaskCreate(&handleBluetoothControlTask, "BluetoothControlTask", 2048, NULL, 1, NULL);
 }
 
 bool bluetoothIsConnected() {

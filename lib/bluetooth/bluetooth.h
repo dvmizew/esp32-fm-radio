@@ -20,6 +20,10 @@ extern bool connected;
 extern bool bluetoothSpeakerInitialized;
 extern const char* deviceName;
 
+extern String currentTitle;
+extern String currentArtist;
+extern String currentAlbum;
+
 // function prototypes
 void initializeBluetoothSpeaker(); // ESP32 as A2DP sink (external speaker)
 void deinitializeBluetoothSpeaker(); // deinitialize the Bluetooth speaker
