@@ -66,11 +66,13 @@ void setupWebServer() {
                     radioEnabled = false;
                     Serial.println(F("Radio disabled"));
                 }
+                Serial.println(F("Enabling Bluetooth..."));
                 initializeBluetoothSpeaker();
                 request->send(200, "text/plain", "Bluetooth enabled");
                 Serial.println(F("Bluetooth enabled"));
             } else {
-                disableBluetoothSpeaker();
+                Serial.println(F("Disabling Bluetooth..."));
+                deinitializeBluetoothSpeaker();
                 request->send(200, "text/plain", "Bluetooth disabled");
                 Serial.println(F("Bluetooth disabled"));
             }
