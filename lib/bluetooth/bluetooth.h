@@ -17,6 +17,7 @@ extern BluetoothA2DPSink btAudioSink; // use ESP32 as speaker
 // extern Audio audio; // for tone control (bass, mid-range, treble)
 // also used for the old way of playing audio through the amplifier, which crashes after a while
 extern bool connected;
+extern bool bluetoothSpeakerInitialized;
 extern const char* deviceName;
 
 // function prototypes

@@ -11,6 +11,8 @@ const char* deviceName = DEVICE_NAME;
 
 void initializeBluetoothSpeaker() {
     if (!bluetoothSpeakerInitialized) {
+        Serial.println(F("Initializing Bluetooth speaker..."));
+
         Serial.begin(115200);
 
         // old way, sounds better but crashes after a while
@@ -74,17 +76,24 @@ void initializeBluetoothSpeaker() {
         
         // for controlling the bluetooth audio sink using the buttons
         // you can control the volume, toggle playback and go to the next/previous track
-        handleBluetoothControl();
-        // startHandleBluetoothControlTask();
+        // handleBluetoothControl();
+        startHandleBluetoothControlTask();
+    } else {
+        Serial.println(F("Bluetooth speaker already initialized"));
     }
 }
 
 void deinitializeBluetoothSpeaker() {
-    Serial.println(F("Stopping Bluetooth audio sink..."));
-    btAudioSink.stop();
-    Serial.println(F("Stopping I2S..."));
-    i2s.end();
-    Serial.println(F("Bluetooth speaker deinitialized"));
+    if (bluetoothSpeakerInitialized) {
+        Serial.println(F("Stopping Bluetooth audio sink..."));
+        btAudioSink.end();
+        Serial.println(F("Stopping I2S..."));
+        i2s.end();
+        bluetoothSpeakerInitialized = false;
+        Serial.println(F("Bluetooth speaker deinitialized"));
+    } else {
+        Serial.println(F("Bluetooth speaker was not initialized"));
+    }
 }
 
 void disconnectBluetoothSinkDevice() {
@@ -143,17 +152,16 @@ void handleBluetoothControl() {
     while (true) {
         if (digitalRead(PLAY_BUTTON) == LOW) {
             togglePlayback();
-            delay(BUTTON_DEBOUNCE_DELAY);
+            vTaskDelay(pdMS_TO_TICKS(BUTTON_DEBOUNCE_DELAY));
         }
         handleButtonPress(NEXT_BUTTON, nextButtonHeld, nextButtonPressTime, playNextTrack, volumeUp);
         handleButtonPress(PREV_BUTTON, prevButtonHeld, prevButtonPressTime, playPreviousTrack, volumeDown);
+        vTaskDelay(pdMS_TO_TICKS(10));
     }
 }
 
 void handleBluetoothControlTask(void *pvParameters) {
-    while (true) {
-        handleBluetoothControl();
-    }
+    handleBluetoothControl();
     vTaskDelete(NULL);
 }
 
