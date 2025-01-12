@@ -33,7 +33,7 @@ void initializeBluetoothSpeaker() {
 
         // getting metadata from A2DP source (external device)
         btAudioSink.set_avrc_metadata_callback([](uint8_t id, const uint8_t *value) {
-            if (value && strlen((const char *)value)) {
+            if (value != nullptr && strlen((const char *)value)) {
                 switch (id) {
                     case ESP_AVRC_MD_ATTR_TITLE:
                         currentTitle = (const char *)value;
@@ -50,6 +50,8 @@ void initializeBluetoothSpeaker() {
                     default:
                         break;
                 }
+            } else {
+                Serial.println(F("Metadata value is null or empty"));
             }
         });
 
