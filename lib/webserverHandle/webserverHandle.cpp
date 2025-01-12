@@ -137,6 +137,29 @@ void setupWebServer() {
             restartESP();
         });
 
+        server.on("/getSystemStats", HTTP_GET, [](AsyncWebServerRequest *request){
+            multi_heap_info_t heapInfo;
+            heap_caps_get_info(&heapInfo, MALLOC_CAP_DEFAULT);
+
+            size_t totalHeap = ESP.getHeapSize();
+            size_t freeHeap = heapInfo.total_free_bytes;
+            size_t usedHeap = totalHeap - freeHeap;
+            size_t freeSPIFFFS = SPIFFS.totalBytes() - SPIFFS.usedBytes();
+            size_t freePSRAM = ESP.getFreePsram();
+            float chipTemp = temperatureRead();
+
+            String json = "{";
+            json += "\"totalHeap\":" + String(totalHeap / 1024) + ",";
+            json += "\"freeHeap\":" + String(freeHeap / 1024) + ",";
+            json += "\"usedHeap\":" + String(usedHeap / 1024) + ",";
+            json += "\"freePSRAM\":" + String(freePSRAM / 1024) + ",";
+            json += "\"freeSPIFFS\":" + String(freeSPIFFFS / 1024) + ",";
+            json += "\"chipTemp\":" + String(chipTemp);
+            json += "}";
+
+            request->send(200, "application/json", json);
+        });
+
         server.begin();
         Serial.println(F("Web server started"));
     } else 

@@ -16,6 +16,7 @@
                 <li><a href="#" onclick="showSection('radio-section')">Radio</a></li>
                 <li><a href="#" onclick="showSection('bluetooth-section')">Bluetooth</a></li>
                 <li><a href="#" onclick="showSection('settings-section')">Settings</a></li>
+                <li><a href="#" onclick="showSection('system-stats-section')">System Stats</a></li>
             </ul>
         </nav>
     </div>
@@ -30,11 +31,6 @@
             </div>
             <p>Set Frequency: <input type="text" id="frequency-input" placeholder="Enter frequency"> MHz</p>
             <button onclick="setFrequency()">Set Frequency</button>
-            <p>Volume: <span id="volume">5</span></p>
-            <div class="buttons">
-                <button onclick="adjustVolume(true)">Volume +</button>
-                <button onclick="adjustVolume(false)">Volume -</button>
-            </div>
             <h3>Romanian Stations</h3>
             <div class="buttons">
                 <button onclick="setStationFrequency(105.3)">Radio România Actualități</button>
@@ -70,6 +66,10 @@
                 <button onclick="volumeUp()">Volume +</button>
                 <button onclick="volumeDown()">Volume -</button>
             </div>
+        </div>
+        <div id="system-stats-section" class="section" style="display:none;">
+            <h2>System Statistics</h2>
+            <p id="system-stats"></p>
         </div>
         <div id="settings-section" class="section" style="display:none;">
             <h2>Settings</h2>

@@ -142,3 +142,30 @@ document.addEventListener('DOMContentLoaded', (event) => {
     fetchCurrentFrequency();
     fetchCurrentVolume();
 });
+
+function fetchSystemStats() {
+    fetch('/getSystemStats')
+        .then(response => response.json())
+        .then(data => {
+            const statsElement = document.getElementById('system-stats');
+            statsElement.innerHTML = `
+                <p>Total Heap: ${data.totalHeap} KB</p>
+                <p>Free Heap: ${data.freeHeap} KB</p>
+                <p>Used Heap: ${data.usedHeap} KB</p>
+                <p>Free PSRAM: ${data.freePSRAM} KB</p>
+                <p>Free SPIFFS: ${data.freeSPIFFS} KB</p>
+                <p>Chip Temperature: ${data.chipTemp} °C</p>
+            `;
+        });
+}
+
+function startSystemStatsUpdate() {
+    fetchSystemStats();
+    setInterval(fetchSystemStats, 1000); // update every second
+}
+
+document.addEventListener('DOMContentLoaded', (event) => {
+    fetchCurrentFrequency();
+    fetchCurrentVolume();
+    startSystemStatsUpdate();
+});
