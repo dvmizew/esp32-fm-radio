@@ -1,17 +1,16 @@
 #include "displayHandle.h"
 #include "webserverHandle.h"
 #include "hardware.h"
-// #include "bluetooth.h"
-
-DisplayHandle displayHandle;
+#include "bluetooth.h"
 
 void setup() {
     Serial.begin(115200);
-    displayHandle.initDisplay();
-    displayHandle.displayCustomMessage("X-PERT Production\nCioc Music\nCBX the family\nAlex Botea\n");
-    setupWebServer();
-    // initializeBluetoothSpeaker();
-    displayHandle.displayResourceUsage();
+    initDisplay();
+    // displayCustomMessage("X-PERT Production\nCioc Music\nCBX the family\nAlex Botea\n");
+    // setupWebServer();
+    initializeBluetoothSpeaker();
+    // displayResourceUsage();
+    startDisplayBluetoothInfoTask();
 }
 
 void loop() {
