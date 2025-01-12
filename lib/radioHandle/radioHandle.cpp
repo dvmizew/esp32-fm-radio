@@ -76,8 +76,8 @@ void handleRadioControl() {
             radioEnabled = !radioEnabled;
             vTaskDelay(pdMS_TO_TICKS(BUTTON_DEBOUNCE_DELAY));
         }
-        handleButtonPress(NEXT_BUTTON, nextButtonHeld, nextButtonPressTime, increaseRadioFrequency, volumeUp);
-        handleButtonPress(PREV_BUTTON, prevButtonHeld, prevButtonPressTime, decreaseRadioFrequency, volumeDown);
+        handleButtonPress(NEXT_BUTTON, nextButtonHeld, nextButtonPressTime, increaseRadioFrequency, NULL);
+        handleButtonPress(PREV_BUTTON, prevButtonHeld, prevButtonPressTime, decreaseRadioFrequency, NULL);
         vTaskDelay(pdMS_TO_TICKS(10));
     }
 }
@@ -140,18 +140,6 @@ void printRadioStations() {
     for (int i = 0; i < MAX_RADIO_STATIONS; ++i) {
         Serial.printf("Station %d: %.1f FM\n", i + 1, stations[i].frequency);
     }
-}
-
-int32_t get_sound_data(Frame *data, int32_t frameCount) {
-    // this function is supposed to get sound data from TEA5767 using I2S
-    // TODO
-    return frameCount;
-}
-
-void passAudioToBluetooth() {
-    // this function is supposed to pass audio data from get_sound_data to the Bluetooth speaker
-    BluetoothA2DPSource bluetoothRadioSource;
-    bluetoothRadioSource.start(DEVICE_NAME);
 }
 
 // getters
