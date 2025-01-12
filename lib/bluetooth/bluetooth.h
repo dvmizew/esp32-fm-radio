@@ -2,8 +2,9 @@
 #define BLUETOOTH_H
 
 #include "hardware.h"
+#include "displayHandle.h" // for displaying avrc metadata on the OLED display
 #include <Wire.h>
-#include <AudioTools.h>
+// #include <AudioTools.h>
 #include <BluetoothA2DPSink.h>
 #include <BluetoothA2DPSource.h>
 // #include <Audio.h>
@@ -35,9 +36,8 @@ void togglePlayback(); // pause or play the track
 void volumeUp(); // increase the volume
 void volumeDown(); // decrease the volume
 void volumeChange(int volume); // change the volume
-void handleBluetoothControl(); // handle Bluetooth control using the buttons
-void handleBluetoothControlTask(void *pvParameters); // task to handle Bluetooth control
-void startHandleBluetoothControlTask(); // start Bluetooth control task
+void startBluetoothTask(); // Start the Bluetooth control and display task
+void bluetoothTask(void *pvParameters); // Task function for Bluetooth control and display
 
 // getters
 bool bluetoothIsConnected(); // returns true if some a2dp device is connected

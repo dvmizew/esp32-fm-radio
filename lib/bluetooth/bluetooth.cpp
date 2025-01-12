@@ -6,7 +6,7 @@ bool connected = false;
 bool bluetoothSpeakerInitialized = false;
 const char* deviceName = DEVICE_NAME;
 
-TaskHandle_t bluetoothControlTaskHandle = nullptr;
+TaskHandle_t bluetoothTaskHandle = nullptr;
 
 // global variables to store metadata
 String currentTitle = "";
@@ -29,9 +29,9 @@ void initializeBluetoothSpeaker() {
         i2s.begin(cfg);
 
         Serial.println(F("Starting Bluetooth audio sink..."));
-        btAudioSink.start(deviceName); // start the Bluetooth audio sink and now it's discoverable
+        btAudioSink.start(deviceName); // start Bluetooth audio sink and make it discoverable
 
-        // getting metadata from A2DP source (external device)
+        // metadata callback
         btAudioSink.set_avrc_metadata_callback([](uint8_t id, const uint8_t *value) {
             if (value != nullptr && strlen((const char *)value)) {
                 switch (id) {
@@ -59,43 +59,68 @@ void initializeBluetoothSpeaker() {
         btAudioSink.set_auto_reconnect(true, 1000); // auto reconnect after 1 second
         Serial.printf_P(PSTR("%s is now discoverable\n"), DEVICE_NAME);
         bluetoothSpeakerInitialized = true;
-        
-        // for controlling the bluetooth audio sink using the buttons
-        // you can control the volume, toggle playback and go to the next/previous track
-        startHandleBluetoothControlTask();
+
+        // start Bluetooth control and display task
+        startBluetoothTask();
         Serial.printf("Heap after Bluetooth init: %u\n", ESP.getFreeHeap());
     } else {
         Serial.println(F("Bluetooth speaker already initialized"));
     }
 }
 
-void startHandleBluetoothControlTask() {
-    if (bluetoothControlTaskHandle == nullptr) {
+void startBluetoothTask() {
+    // there i start the bluetooth task which will handle the bluetooth controls and display the metadata on the OLED display
+    if (bluetoothTaskHandle == nullptr) {
         xTaskCreatePinnedToCore(
-            handleBluetoothControlTask,
-            "BluetoothControlTask",
-            2048,
+            bluetoothTask,
+            "BluetoothTask",
+            4096,
             nullptr,
             1,
-            &bluetoothControlTaskHandle,
-            1 // assign to Core 1
+            &bluetoothTaskHandle,
+            1 // assign to core 1
         );
     }
 }
 
-void handleBluetoothControlTask(void *pvParameters) {
-    handleBluetoothControl();
-    vTaskDelete(nullptr);
-    bluetoothControlTaskHandle = nullptr;
+void bluetoothTask(void *pvParameters) {
+    setupButtons();
+    unsigned long nextButtonPressTime = 0;
+    unsigned long prevButtonPressTime = 0;
+    bool nextButtonHeld = false;
+    bool prevButtonHeld = false;
+
+    while (true) {
+        // bluetooth button controls
+        if (digitalRead(PLAY_BUTTON) == LOW) {
+            togglePlayback();
+            vTaskDelay(pdMS_TO_TICKS(BUTTON_DEBOUNCE_DELAY));
+        }
+        handleButtonPress(NEXT_BUTTON, nextButtonHeld, nextButtonPressTime, playNextTrack, volumeUp);
+        handleButtonPress(PREV_BUTTON, prevButtonHeld, prevButtonPressTime, playPreviousTrack, volumeDown);
+
+        // display avrc metadata on the OLED display
+        if (isDisplayInitialized()) {
+            clearAndUpdate();
+            display.printf("%s\n\n", getBluetoothDeviceName());
+            display.printf("Connected: %s\n", bluetoothIsConnected() ? "Yes" : "No");
+            display.printf("Title: %s\n", currentTitle.c_str());
+            display.printf("Artist: %s\n", currentArtist.c_str());
+            display.printf("Album: %s\n", currentAlbum.c_str());
+            display.display();
+        }
+
+        vTaskDelay(pdMS_TO_TICKS(1000)); // update display every second
+    }
 }
 
 void deinitializeBluetoothSpeaker() {
     if (bluetoothSpeakerInitialized) {
         Serial.println(F("Stopping Bluetooth audio sink..."));
 
-        if (bluetoothControlTaskHandle != nullptr) {
-            vTaskDelete(bluetoothControlTaskHandle);
-            bluetoothControlTaskHandle = nullptr;
+        if (bluetoothTaskHandle != nullptr) {
+            vTaskDelete(bluetoothTaskHandle);
+            bluetoothTaskHandle = nullptr;
         }
 
         btAudioSink.end();
