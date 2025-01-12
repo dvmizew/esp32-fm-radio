@@ -10,7 +10,6 @@
 #include <freertos/task.h> // for multithreading
 #include "hardware.h" // for display pins
 #include "wifiHandle.h" // for printing wifi networks
-#include "bluetooth.h" // for printing bluetooth connection status
 #include "radioHandle.h" // for printing radio information
 
 #define I2C_FREQUENCY 400000
@@ -18,6 +17,9 @@
 #define DISPLAY_HEIGHT 64
 #define TEXT_SIZE_SMALL 1
 #define TEXT_SIZE_LARGE 2
+
+extern TwoWire I2C_display; // I2C bus 1
+extern Adafruit_SSD1306 display; // 128x64 display
 
 void initDisplay(); // initialize display with default settings
 void clearAndUpdate(); // clear display and set cursor to (0, 0)
@@ -31,23 +33,19 @@ void displayCurrentDateTime();
 // print methods from other modules
 void displayWiFiNetworks();
 void displayWiFiConnectionStatus();
-void displayBluetoothInfo();
 void displayRadioInfo();
 void displayWeatherInfo();
 void displayRDSInfo();
-void displayBluetoothConnectionStatus();
 void displayAudioInfo();
 
 // tasks
 void displayResourceUsageTask(void *pvParameters);
 void displayDateTimeTask(void *pvParameters);
-void displayBluetoothInfoTask(void *pvParameters);
 void displayRadioInfoTask(void *pvParameters);
 
 // start tasks
 void displayPrintResourceUsageTask();
 void displayPrintDateTimeTask();
-void startDisplayBluetoothInfoTask();
 void startRadioInfoDisplayTask();
 
 // getter

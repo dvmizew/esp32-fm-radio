@@ -159,32 +159,6 @@ void displayWiFiConnectionStatus() {
     display.display();
 }
 
-void displayBluetoothInfo() {
-    clearAndUpdate();
-
-    while (true) {
-        display.clearDisplay();
-        display.setCursor(0, 0);
-        display.printf("%s\n\n", getBluetoothDeviceName());
-        display.printf("Connected: %s\n", bluetoothIsConnected() ? "Yes" : "No");
-        display.printf("Title: %s\n", currentTitle.c_str());
-        display.printf("Artist: %s\n", currentArtist.c_str());
-        display.printf("Album: %s\n", currentAlbum.c_str());
-
-        display.display();
-        vTaskDelay(1000 / portTICK_PERIOD_MS); // 1 second delay
-    }
-}
-
-void displayBluetoothInfoTask(void *pvParameters) {
-    displayBluetoothInfo();
-    vTaskDelete(NULL);
-}
-
-void startDisplayBluetoothInfoTask() {
-    xTaskCreate(displayBluetoothInfoTask, "BluetoothInfoTask", 2048, NULL, 1, NULL);
-}
-
 void displayRadioInfo() {
     clearAndUpdate();
 
@@ -216,21 +190,6 @@ void displayWeatherInfo() {
 
 void displayRDSInfo() {
     // TODO
-}
-
-void displayBluetoothConnectionStatus() {
-    clearAndUpdate();
-
-    if (bluetoothIsConnected()) {
-        display.println("Bluetooth Connected");
-        display.printf("Device: %s\n", getBluetoothDeviceName());
-
-        // display.printf("RSSI: %d dBm\n", bluetoothHandle.getSignalStrength());
-    } else {
-        display.println("Bluetooth Not Connected");
-    }
-
-    display.display();
 }
 
 void displayAudioInfo() {
