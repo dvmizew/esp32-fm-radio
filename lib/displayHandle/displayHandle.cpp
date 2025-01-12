@@ -1,11 +1,10 @@
 #include "displayHandle.h"
 
-DisplayHandle::DisplayHandle()
-    : I2C_display(1), // I2C bus 1
-      display(DISPLAY_WIDTH, DISPLAY_HEIGHT, &I2C_display), // 128x64 display
-      displayInitialized(false) {} // we init the display in the main program
+TwoWire I2C_display(1); // I2C bus 1
+Adafruit_SSD1306 display(DISPLAY_WIDTH, DISPLAY_HEIGHT, &I2C_display); // 128x64 display
+bool displayInitialized = false;
 
-void DisplayHandle::initDisplay() {
+void initDisplay() {
     I2C_display.begin(DISPLAY_SDA_PIN, DISPLAY_SCL_PIN, I2C_FREQUENCY); // start I2C bus with SDA and SCL pins
     if (!display.begin(SSD1306_SWITCHCAPVCC, SSD1306_I2C_ADDRESS)) {
         Serial.println(F("Error initializing display!"));
@@ -18,14 +17,14 @@ void DisplayHandle::initDisplay() {
     displayInitialized = true;
 }
 
-void DisplayHandle::displayCustomMessage(const char *message) {
+void displayCustomMessage(const char *message) {
     clearAndUpdate();
     display.setTextSize(strlen(message) > 16 ? 1 : 2);
     display.println(message);
     display.display();
 }
 
-void DisplayHandle::displayCurrentDateTime() {
+void displayCurrentDateTime() {
     while (true) {
         clearAndUpdate();
         
@@ -47,17 +46,16 @@ void DisplayHandle::displayCurrentDateTime() {
     }
 }
 
-void DisplayHandle::displayDateTimeTask(void *pvParameters) {
-    DisplayHandle *displayHandle = static_cast<DisplayHandle*>(pvParameters);
-    displayHandle->displayCurrentDateTime();
+void displayDateTimeTask(void *pvParameters) {
+    displayCurrentDateTime();
     vTaskDelete(NULL);
 }
 
-void DisplayHandle::displayPrintDateTimeTask() {
-    xTaskCreate(&DisplayHandle::displayDateTimeTask, "DateTimeTask", 2048, this, 1, NULL);
+void displayPrintDateTimeTask() {
+    xTaskCreate(displayDateTimeTask, "DateTimeTask", 2048, NULL, 1, NULL);
 }
 
-void DisplayHandle::displayResourceUsage() {
+void displayResourceUsage() {
     clearAndUpdate();
 
     while (true) {
@@ -88,17 +86,16 @@ void DisplayHandle::displayResourceUsage() {
     }
 }
 
-void DisplayHandle::displayResourceUsageTask(void *pvParameters) {
-    DisplayHandle *displayHandle = static_cast<DisplayHandle*>(pvParameters);
-    displayHandle->displayResourceUsage();
+void displayResourceUsageTask(void *pvParameters) {
+    displayResourceUsage();
     vTaskDelete(NULL);
 }
 
-void DisplayHandle::displayPrintResourceUsageTask() {
-    xTaskCreate(&DisplayHandle::displayResourceUsageTask, "ResourceUsageTask", 2048, this, 1, NULL);
+void displayPrintResourceUsageTask() {
+    xTaskCreate(displayResourceUsageTask, "ResourceUsageTask", 2048, NULL, 1, NULL);
 }
 
-void DisplayHandle::displaySystemInfo() {
+void displaySystemInfo() {
     clearAndUpdate();
 
     display.printf("CPU Freq: %d MHz\n", ESP.getCpuFreqMHz());
@@ -116,7 +113,7 @@ void DisplayHandle::displaySystemInfo() {
     display.display();
 }
 
-void DisplayHandle::displaySPIFFSInfo() {
+void displaySPIFFSInfo() {
     clearAndUpdate();
 
     if (!SPIFFS.begin(true)) {
@@ -132,7 +129,7 @@ void DisplayHandle::displaySPIFFSInfo() {
 }
 
 // print methods from other modules
-void DisplayHandle::displayWiFiNetworks() {
+void displayWiFiNetworks() {
     clearAndUpdate();
 
     int availableNetworkCount = WiFi.scanNetworks();
@@ -144,7 +141,7 @@ void DisplayHandle::displayWiFiNetworks() {
     display.display();
 }
 
-void DisplayHandle::displayWiFiConnectionStatus() {
+void displayWiFiConnectionStatus() {
     clearAndUpdate();
 
     if (isWiFiConnected()) {
@@ -162,7 +159,7 @@ void DisplayHandle::displayWiFiConnectionStatus() {
     display.display();
 }
 
-void DisplayHandle::displayBluetoothInfo() {
+void displayBluetoothInfo() {
     clearAndUpdate();
 
     while (true) {
@@ -179,17 +176,16 @@ void DisplayHandle::displayBluetoothInfo() {
     }
 }
 
-void DisplayHandle::displayBluetoothInfoTask(void *pvParameters) {
-    DisplayHandle *displayHandle = static_cast<DisplayHandle*>(pvParameters);
-    displayHandle->displayBluetoothInfo();
+void displayBluetoothInfoTask(void *pvParameters) {
+    displayBluetoothInfo();
     vTaskDelete(NULL);
 }
 
-void DisplayHandle::displayPrintBluetoothInfoTask() {
-    xTaskCreate(&DisplayHandle::displayBluetoothInfoTask, "BluetoothInfoTask", 2048, this, 1, NULL);
+void startDisplayBluetoothInfoTask() {
+    xTaskCreate(displayBluetoothInfoTask, "BluetoothInfoTask", 2048, NULL, 1, NULL);
 }
 
-void DisplayHandle::displayRadioInfo() {
+void displayRadioInfo() {
     clearAndUpdate();
 
     while (true) {
@@ -205,25 +201,24 @@ void DisplayHandle::displayRadioInfo() {
     }
 }
 
-void DisplayHandle::displayRadioInfoTask(void *pvParameters) {
-    DisplayHandle *displayHandle = static_cast<DisplayHandle*>(pvParameters);
-    displayHandle->displayRadioInfo();
+void displayRadioInfoTask(void *pvParameters) {
+    displayRadioInfo();
     vTaskDelete(NULL);
 }
 
-void DisplayHandle::startRadioInfoDisplayTask() {
-    xTaskCreate(&DisplayHandle::displayRadioInfoTask, "RadioInfoTask", 2048, this, 1, NULL);
+void startRadioInfoDisplayTask() {
+    xTaskCreate(displayRadioInfoTask, "RadioInfoTask", 2048, NULL, 1, NULL);
 }
 
-void DisplayHandle::displayWeatherInfo() {
+void displayWeatherInfo() {
     // TODO
 }
 
-void DisplayHandle::displayRDSInfo() {
+void displayRDSInfo() {
     // TODO
 }
 
-void DisplayHandle::displayBluetoothConnectionStatus() {
+void displayBluetoothConnectionStatus() {
     clearAndUpdate();
 
     if (bluetoothIsConnected()) {
@@ -238,16 +233,16 @@ void DisplayHandle::displayBluetoothConnectionStatus() {
     display.display();
 }
 
-void DisplayHandle::displayAudioInfo() {
+void displayAudioInfo() {
     // TODO
 }
 
 // status getter for display
-bool DisplayHandle::isDisplayInitialized() const {
+bool isDisplayInitialized() {
     return displayInitialized;
 }
 
-void DisplayHandle::clearAndUpdate() {
+void clearAndUpdate() {
     display.clearDisplay();
     display.setCursor(0, 0);
 }

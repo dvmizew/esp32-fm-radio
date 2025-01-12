@@ -19,49 +19,38 @@
 #define TEXT_SIZE_SMALL 1
 #define TEXT_SIZE_LARGE 2
 
-class DisplayHandle {
-public:
-    DisplayHandle();
-    ~DisplayHandle() = default;
+void initDisplay(); // initialize display with default settings
+void clearAndUpdate(); // clear display and set cursor to (0, 0)
+void displayCustomMessage(const char *message);
 
-    void initDisplay(); // initialize display with default settings
-    void clearAndUpdate(); // clear display and set cursor to (0, 0)
-    void displayCustomMessage(const char *message);
+void displayResourceUsage();
+void displaySystemInfo();
+void displaySPIFFSInfo();
+void displayCurrentDateTime();
 
-    void displayResourceUsage();
-    void displaySystemInfo();
-    void displaySPIFFSInfo();
-    void displayCurrentDateTime();
+// print methods from other modules
+void displayWiFiNetworks();
+void displayWiFiConnectionStatus();
+void displayBluetoothInfo();
+void displayRadioInfo();
+void displayWeatherInfo();
+void displayRDSInfo();
+void displayBluetoothConnectionStatus();
+void displayAudioInfo();
 
-    // print methods from other modules
-    void displayWiFiNetworks();
-    void displayWiFiConnectionStatus();
-    void displayBluetoothInfo();
-    void displayRadioInfo();
-    void displayWeatherInfo();
-    void displayRDSInfo();
-    void displayBluetoothConnectionStatus();
-    void displayAudioInfo();
+// tasks
+void displayResourceUsageTask(void *pvParameters);
+void displayDateTimeTask(void *pvParameters);
+void displayBluetoothInfoTask(void *pvParameters);
+void displayRadioInfoTask(void *pvParameters);
 
-    // tasks
-    static void displayResourceUsageTask(void *pvParameters);
-    static void displayDateTimeTask(void *pvParameters);
-    static void displayBluetoothInfoTask(void *pvParameters);
-    static void displayRadioInfoTask(void *pvParameters);
+// start tasks
+void displayPrintResourceUsageTask();
+void displayPrintDateTimeTask();
+void startDisplayBluetoothInfoTask();
+void startRadioInfoDisplayTask();
 
-    // start tasks
-    void displayPrintResourceUsageTask();
-    void displayPrintDateTimeTask();
-    void displayPrintBluetoothInfoTask();
-    void startRadioInfoDisplayTask();
-
-    // getter
-    bool isDisplayInitialized() const;
-
-private:
-    TwoWire I2C_display; // I2C bus for display
-    Adafruit_SSD1306 display; // display object
-    bool displayInitialized;
-};
+// getter
+bool isDisplayInitialized();
 
 #endif
