@@ -7,6 +7,12 @@
 
 #define DEVICE_NAME "ESP32inatorul"
 
+#define BT_TASK_HEAP_SIZE 4096
+#define BT_TASK_PRIORITY 1
+
+#define WEBSERVER_TASK_HEAP_SIZE 4096
+#define WEBSERVER_TASK_PRIORITY 1
+
 // pin definitions
 #define INTERNAL_LED 2
 
