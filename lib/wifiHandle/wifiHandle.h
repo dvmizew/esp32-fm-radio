@@ -18,6 +18,10 @@ extern WiFiCredentials savedNetworks[MAX_NETWORKS];
 extern uint8_t savedNetworksCount;
 extern uint8_t nextID;
 
+// timer functions
+void initTimers();
+unsigned long customMillis();
+
 // STATION MODE
 void scanWiFiNetworks(); // scan for available Wi-Fi networks
 void connectToWiFiNetwork(const char* ssid, const char* password); // connect to a Wi-Fi network
