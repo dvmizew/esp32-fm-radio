@@ -74,9 +74,9 @@ void startBluetoothTask() {
         xTaskCreatePinnedToCore(
             bluetoothTask,
             "BluetoothTask",
-            4096,
+            BT_TASK_HEAP_SIZE,
             nullptr,
-            1,
+            BT_TASK_PRIORITY,
             &bluetoothTaskHandle,
             1 // assign to core 1
         );
@@ -127,10 +127,28 @@ void deinitializeBluetoothSpeaker() {
         Serial.println(F("Stopping I2S..."));
         i2s.end();
 
-        esp_bt_controller_disable(); // reset the Bluetooth stack
-        esp_bt_controller_enable(ESP_BT_MODE_CLASSIC_BT);
+        // deinitialize i2s
+        if (i2s_driver_uninstall(I2S_NUM_0) == ESP_OK) {
+            periph_module_disable(PERIPH_I2S0_MODULE);
+        } else {
+            Serial.println(F("I2S driver was not installed"));
+        }
+
+        // deinitialize the bluetooth stack
+        esp_bluedroid_disable();
+        esp_bluedroid_deinit();
+
+        // release the memory
+        esp_bt_mem_release(ESP_BT_MODE_CLASSIC_BT);
 
         bluetoothSpeakerInitialized = false;
+
+        // // check heap integrity
+        // if (heap_caps_check_integrity_all(true)) {
+        //     Serial.println(F("Heap integrity check passed"));
+        // } else {
+        //     Serial.println(F("Heap integrity check failed"));
+        // }
 
         Serial.printf("Heap after Bluetooth deinit: %u\n", ESP.getFreeHeap());
     } else {
