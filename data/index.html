@@ -15,7 +15,7 @@
             <ul>
                 <li><a href="#" onclick="showSection('radio-section')">Radio</a></li>
                 <li><a href="#" onclick="showSection('bluetooth-section')">Bluetooth</a></li>
-                <li><a href="#" onclick="showSection('settings-section')">Settings</a></li>
+                <li><a href="#" onclick="showSection('settings-section'); fetchWiFiDetails();">Settings</a></li>
                 <li><a href="#" onclick="showSection('system-stats-section')">System Stats</a></li>
             </ul>
         </nav>
@@ -74,9 +74,32 @@
         <div id="settings-section" class="section" style="display:none;">
             <h2>Settings</h2>
             <h3>Wi-Fi</h3>
-            <!-- Add Wi-Fi settings controls here -->
+            <p>
+                <label for="wifi-ssid">SSID:</label>
+                <input type="text" id="wifi-ssid" placeholder="Enter SSID">
+            </p>
+            <p>
+                <label for="wifi-password">Password:</label>
+                <input type="password" id="wifi-password" placeholder="Enter Password">
+            </p>
+            <button onclick="addWiFiCredentials()">Save Wi-Fi Settings</button>
+            <button onclick="connectToWiFi()">Connect to Wi-Fi</button>
+            <button onclick="scanWiFiNetworks()">Scan Wi-Fi Networks</button>
+            <ul id="networks-list"></ul>
+            <h3>Current Wi-Fi Connection</h3>
+            <p>Connected to: <span id="current-ssid">N/A</span></p>
+            <p>IP Address: <span id="current-ip">N/A</span></p>
+            <p>Signal Strength: <span id="current-signal">N/A</span></p>
+            <h3>Saved Wi-Fi Networks</h3>
+            <ul id="saved-networks-list"></ul>
+            <button onclick="fetchSavedWiFiCredentials()">Fetch Saved Wi-Fi Networks</button>
+            <button onclick="clearWiFiCredentials()">Clear All Wi-Fi Credentials</button>
             <h3>System</h3>
-            <!-- Add system settings controls here -->
+            <p>
+                <label for="device-name">Device Name:</label>
+                <input type="text" id="device-name" placeholder="Enter Device Name">
+            </p>
+            <button onclick="saveSystemSettings()">Save System Settings</button>
         </div>
     </div>
     <button class="restart-button" onclick="restartESP()">Restart ESP</button>

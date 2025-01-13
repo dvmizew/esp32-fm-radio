@@ -169,6 +169,106 @@ void setupWebServer() {
         request->send(200, "application/json", json);
     });
 
+    server.on("/getWiFiDetails", HTTP_GET, [](AsyncWebServerRequest *request){
+        String json = "{";
+        json += "\"ssid\":\"" + WiFi.SSID() + "\",";
+        json += "\"ip\":\"" + WiFi.localIP().toString() + "\",";
+        json += "\"signalStrength\":\"" + String(map(WiFi.RSSI(), -100, -40, 0, 100)) + "\"";
+        json += "}";
+        request->send(200, "application/json", json);
+    });
+
+    server.on("/getWiFiStatus", HTTP_GET, [](AsyncWebServerRequest *request){
+        String json = "{";
+        if (isWiFiConnected()) {
+            json += "\"connected\":true,";
+            json += "\"ssid\":\"" + WiFi.SSID() + "\",";
+            json += "\"ip\":\"" + WiFi.localIP().toString() + "\",";
+            json += "\"signalStrength\":\"" + String(map(WiFi.RSSI(), -100, -40, 0, 100)) + "\"";
+        } else {
+            json += "\"connected\":false";
+        }
+        json += "}";
+        request->send(200, "application/json", json);
+    });
+
+    server.on("/scanWiFiNetworks", HTTP_GET, [](AsyncWebServerRequest *request){
+        int n = WiFi.scanNetworks();
+        String json = "[";
+        for (int i = 0; i < n; ++i) {
+            if (i > 0) json += ",";
+            json += "{";
+            json += "\"ssid\":\"" + WiFi.SSID(i) + "\",";
+            json += "\"rssi\":" + String(WiFi.RSSI(i));
+            json += "}";
+        }
+        json += "]";
+        request->send(200, "application/json", json);
+    });
+
+    server.on("/connectToWiFi", HTTP_GET, [](AsyncWebServerRequest *request){
+        if (request->hasParam("ssid") && request->hasParam("password")) {
+            String ssid = request->getParam("ssid")->value();
+            String password = request->getParam("password")->value();
+            connectToWiFiNetwork(ssid.c_str(), password.c_str());
+            request->send(200, "text/plain", "Connecting to Wi-Fi...");
+        } else {
+            request->send(400, "text/plain", "SSID or password parameter missing");
+        }
+    });
+
+    server.on("/addWiFiCredentials", HTTP_GET, [](AsyncWebServerRequest *request){
+        if (request->hasParam("ssid") && request->hasParam("password")) {
+            String ssid = request->getParam("ssid")->value();
+            String password = request->getParam("password")->value();
+            addWiFiCredentials(savedNetworks, &savedNetworksCount, &nextID, ssid.c_str(), password.c_str());
+            request->send(200, "text/plain", "Wi-Fi credentials added");
+        } else {
+            request->send(400, "text/plain", "SSID or password parameter missing");
+        }
+    });
+
+    server.on("/printWiFiConnectionStatus", HTTP_GET, [](AsyncWebServerRequest *request){
+        String status;
+        if (WiFi.status() == WL_CONNECTED) {
+            status = "Connected to " + WiFi.SSID() + "\n";
+            status += "IP address: " + WiFi.localIP().toString() + "\n";
+            status += "RSSI: " + String(WiFi.RSSI()) + " dBm\n";
+            status += "Signal strength: " + String(map(WiFi.RSSI(), -100, -40, 0, 100)) + "/100\n";
+        } else {
+            status = "Wi-Fi not connected.";
+        }
+        request->send(200, "text/plain", status);
+    });
+
+    server.on("/removeWiFiCredentials", HTTP_GET, [](AsyncWebServerRequest *request){
+        if (request->hasParam("ssid")) {
+            String ssid = request->getParam("ssid")->value();
+            removeWiFiCredentials(savedNetworks, &savedNetworksCount, ssid.c_str());
+            request->send(200, "text/plain", "Wi-Fi credentials removed");
+        } else {
+            request->send(400, "text/plain", "SSID parameter missing");
+        }
+    });
+
+    server.on("/clearWiFiCredentials", HTTP_GET, [](AsyncWebServerRequest *request){
+        clearAllWiFiCredentials(savedNetworks, &savedNetworksCount, &nextID);
+        request->send(200, "text/plain", "All Wi-Fi credentials cleared");
+    });
+
+    server.on("/getSavedWiFiCredentials", HTTP_GET, [](AsyncWebServerRequest *request){
+        String json = "[";
+        for (int i = 0; i < savedNetworksCount; ++i) {
+            if (i > 0) json += ",";
+            json += "{";
+            json += "\"id\":" + String(savedNetworks[i].ID) + ",";
+            json += "\"ssid\":\"" + String(savedNetworks[i].ssid) + "\"";
+            json += "}";
+        }
+        json += "]";
+        request->send(200, "application/json", json);
+    });
+
     server.begin();
     Serial.println(F("Web server started"));
 }

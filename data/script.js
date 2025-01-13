@@ -138,11 +138,6 @@ function restartESP() {
         });
 }
 
-document.addEventListener('DOMContentLoaded', (event) => {
-    fetchCurrentFrequency();
-    fetchCurrentVolume();
-});
-
 function fetchSystemStats() {
     fetch('/getSystemStats')
         .then(response => response.json())
@@ -159,6 +154,85 @@ function fetchSystemStats() {
         });
 }
 
+function fetchWiFiDetails() {
+    fetch('/getWiFiDetails')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('current-ssid').innerText = data.ssid;
+            document.getElementById('current-ip').innerText = data.ip;
+            document.getElementById('current-signal').innerText = data.signalStrength;
+        });
+}
+
+function scanWiFiNetworks() {
+    fetch('/scanWiFiNetworks')
+        .then(response => response.json())
+        .then(data => {
+            const networksList = document.getElementById('networks-list');
+            networksList.innerHTML = '';
+            data.forEach(network => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `${network.ssid} (${network.rssi} dBm)`;
+                networksList.appendChild(listItem);
+            });
+        });
+}
+
+function connectToWiFi() {
+    const ssid = document.getElementById('wifi-ssid').value;
+    const password = document.getElementById('wifi-password').value;
+    fetch(`/connectToWiFi?ssid=${encodeURIComponent(ssid)}&password=${encodeURIComponent(password)}`)
+        .then(response => response.text())
+        .then(data => {
+            alert(data);
+            fetchWiFiDetails();
+        });
+}
+
+function addWiFiCredentials() {
+    const ssid = document.getElementById('wifi-ssid').value;
+    const password = document.getElementById('wifi-password').value;
+    fetch(`/addWiFiCredentials?ssid=${encodeURIComponent(ssid)}&password=${encodeURIComponent(password)}`)
+        .then(response => response.text())
+        .then(data => {
+            alert(data);
+            fetchSavedWiFiCredentials();
+        });
+}
+
+function removeWiFiCredentials() {
+    const ssid = document.getElementById('wifi-ssid').value;
+    fetch(`/removeWiFiCredentials?ssid=${encodeURIComponent(ssid)}`)
+        .then(response => response.text())
+        .then(data => {
+            alert(data);
+            fetchSavedWiFiCredentials();
+        });
+}
+
+function clearWiFiCredentials() {
+    fetch('/clearWiFiCredentials')
+        .then(response => response.text())
+        .then(data => {
+            alert(data);
+            fetchSavedWiFiCredentials();
+        });
+}
+
+function fetchSavedWiFiCredentials() {
+    fetch('/getSavedWiFiCredentials')
+        .then(response => response.json())
+        .then(data => {
+            const savedNetworksList = document.getElementById('saved-networks-list');
+            savedNetworksList.innerHTML = '';
+            data.forEach(network => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `${network.ssid} (ID: ${network.id})`;
+                savedNetworksList.appendChild(listItem);
+            });
+        });
+}
+
 function startSystemStatsUpdate() {
     fetchSystemStats();
     setInterval(fetchSystemStats, 1000); // update every second
@@ -168,4 +242,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
     fetchCurrentFrequency();
     fetchCurrentVolume();
     startSystemStatsUpdate();
+    fetchWiFiDetails();
+    fetchSavedWiFiCredentials();
 });
