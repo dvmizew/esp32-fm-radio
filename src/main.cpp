@@ -38,9 +38,8 @@ void setup() {
     }
 
     if (isWiFiConnected()) {
-        // setupWebServer(); // core 0, prio 1
-    }
-    else {
+        startWebServerTask(); // start the web server task
+    } else {
         Serial.println(F("Web server not started\nWi-Fi not connected or AP mode not started"));
     }
 
