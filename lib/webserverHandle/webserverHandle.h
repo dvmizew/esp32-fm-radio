@@ -11,7 +11,6 @@
 
 extern AsyncWebServer server;
 
-void connectToWifi();
 void initSPIFFS();
 void setupWebServer();
 
