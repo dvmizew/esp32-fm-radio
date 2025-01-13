@@ -1,5 +1,9 @@
 #include "wifiHandle.h"
 
+WiFiCredentials savedNetworks[MAX_NETWORKS];
+uint8_t savedNetworksCount = 0;
+uint8_t nextID = 1;
+
 void printWiFiConnectionDetails() {
     Serial.printf_P(PSTR("Connected to %s\n"), WiFi.SSID().c_str());
     Serial.printf_P(PSTR("IP address: %s\n"), WiFi.localIP().toString().c_str());
