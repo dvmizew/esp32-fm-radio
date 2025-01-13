@@ -1,6 +1,8 @@
 #include "webserverHandle.h"
 
 AsyncWebServer server(80);
+TaskHandle_t webServerTaskHandle = nullptr;
+
 void initSPIFFS() {
     if (!SPIFFS.begin(true)) {
         Serial.println(F("An error has occurred while mounting SPIFFS"));
@@ -12,6 +14,23 @@ void initSPIFFS() {
     } else {
         Serial.println(F("SPIFFS mounted successfully"));
     }
+}
+
+void setupWebServerTask(void *parameter) {
+    setupWebServer();
+    vTaskDelete(NULL);
+}
+
+void startWebServerTask() {
+    xTaskCreatePinnedToCore(
+        setupWebServerTask,
+        "WebServerTask",
+        WEBSERVER_TASK_HEAP_SIZE,
+        nullptr,
+        WEBSERVER_TASK_PRIORITY,
+        &webServerTaskHandle,
+        0 // assign to core 0
+    );
 }
 
 void setupWebServer() {

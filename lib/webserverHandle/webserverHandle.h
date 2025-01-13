@@ -10,8 +10,11 @@
 #include "bluetooth.h" // for Bluetooth control
 
 extern AsyncWebServer server;
+extern TaskHandle_t webServerTaskHandle;
 
 void initSPIFFS();
 void setupWebServer();
+void setupWebServerTask(void *parameter); // task function for setting up the web server
+void startWebServerTask(); // function to start the web server task
 
 #endif
