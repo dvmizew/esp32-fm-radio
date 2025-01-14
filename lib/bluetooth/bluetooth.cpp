@@ -50,8 +50,6 @@ void initializeBluetoothSpeaker() {
                     default:
                         break;
                 }
-            } else {
-                Serial.println(F("Metadata value is null or empty"));
             }
         });
 
@@ -229,14 +227,11 @@ const char* getBluetoothDeviceName() {
 }
 
 void connectionStateCallback(bool isConnected) {
-    pinMode(INTERNAL_LED, OUTPUT);
     if (isConnected) {
         Serial.println(F("Connected to A2DP source"));
-        digitalWrite(INTERNAL_LED, HIGH);
         connected = true;
     } else {
         Serial.println(F("Disconnected from A2DP source"));
-        digitalWrite(INTERNAL_LED, LOW);
         connected = false;
     }
 }

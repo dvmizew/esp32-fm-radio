@@ -36,28 +36,6 @@ void disableRadio() {
     radio.setStandby(true);
 }
 
-void signalStrengthLED() {
-    pinMode(INTERNAL_LED, OUTPUT);
-    while (true) {
-        // this function lights up the LED based on the signal strength
-        int signalLevel = radio.getSignalLevel();
-        int brightness = 0;
-
-        if (signalLevel == 0) {
-            // no signal
-            brightness = 0;
-        } else if (signalLevel == 1) {
-            // weak signal
-            brightness = 128; // 50% brightness
-        } else {
-            // strong signal
-            brightness = 255; // 100% brightness
-        }
-        analogWrite(INTERNAL_LED, brightness);
-        delay(100);
-    }
-}
-
 void handleRadioControl() {
     setupButtons();
     unsigned long nextButtonPressTime = 0;

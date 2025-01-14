@@ -13,9 +13,6 @@
 #define WEBSERVER_TASK_HEAP_SIZE 4096
 #define WEBSERVER_TASK_PRIORITY 1
 
-// pin definitions
-#define INTERNAL_LED 2
-
 // button pins
 #define PLAY_BUTTON 35 // also used for mute toggle for radio
 #define NEXT_BUTTON 32 // also used for volume up
@@ -48,7 +45,6 @@ void setupButtons();
 void handleButtonPress(int button, bool &buttonHeld, unsigned long &buttonPressTime, void (*longPressAction)(), void (*shortPressAction)());
 void testButtons();
 void restartESP();
-void blinkInternalLED();
 void printI2CDevices();
 void printSystemInfo();
 
