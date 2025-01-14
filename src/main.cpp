@@ -49,6 +49,5 @@ void setup() {
 }
 
 void loop() {
-    // keep the loop function running to reset the watchdog timer
-    delay(100);
+
 }
