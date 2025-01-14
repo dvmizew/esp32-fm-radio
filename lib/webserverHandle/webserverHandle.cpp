@@ -87,6 +87,7 @@ void setupWebServer() {
         }
     });
 
+    // radio endpoints
     server.on("/increaseFrequency", HTTP_GET, [](AsyncWebServerRequest *request){
         increaseRadioFrequency();
         request->send(200, "text/plain", "Frequency increased");
@@ -110,7 +111,12 @@ void setupWebServer() {
     server.on("/getFrequency", HTTP_GET, [](AsyncWebServerRequest *request){
         request->send(200, "text/plain", String(getFrequency()));
     });
+    
+    server.on("/getSignalLevel", HTTP_GET, [](AsyncWebServerRequest *request){
+        request->send(200, "text/plain", String(getSignalLevel()));
+    });
 
+    // bluetooth control endpoints
     server.on("/playNextTrack", HTTP_GET, [](AsyncWebServerRequest *request){
         playNextTrack();
         request->send(200, "text/plain", "Next track");
@@ -135,14 +141,10 @@ void setupWebServer() {
         volumeDown();
         request->send(200, "text/plain", "Volume decreased");
     });
-
-    server.on("/getSignalLevel", HTTP_GET, [](AsyncWebServerRequest *request){
-        request->send(200, "text/plain", String(getSignalLevel()));
-    });
-
+    
+    // system endpoints
     server.on("/restart", HTTP_GET, [](AsyncWebServerRequest *request){
         request->send(200, "text/plain", "Restarting...");
-        delay(1000); // 1 second delay
         restartESP();
     });
 
@@ -169,6 +171,7 @@ void setupWebServer() {
         request->send(200, "application/json", json);
     });
 
+    // Wi-Fi endpoints
     server.on("/getWiFiDetails", HTTP_GET, [](AsyncWebServerRequest *request){
         String json = "{";
         json += "\"ssid\":\"" + WiFi.SSID() + "\",";
