@@ -95,17 +95,21 @@ void addWiFiCredentials(WiFiCredentials* savedNetworks, uint8_t* savedNetworksCo
 }
 
 void removeWiFiCredentials(WiFiCredentials* savedNetworks, uint8_t* savedNetworksCount, const char* ssid) {
+    bool found = false;
     for (int i = 0; i < *savedNetworksCount; ++i) {
         if (strncmp(savedNetworks[i].ssid, ssid, MAX_SSID_LEN) == 0) {
+            found = true;
             for (int j = i; j < *savedNetworksCount - 1; ++j) {
                 savedNetworks[j] = savedNetworks[j + 1];
             }
             (*savedNetworksCount)--;
             Serial.println(F("Credentials removed."));
-            return;
+            break;
         }
     }
-    Serial.println(F("SSID not found."));
+    if (!found) {
+        Serial.println(F("SSID not found."));
+    }
 }
 
 void printSavedWiFiCredentials(const WiFiCredentials* savedNetworks, uint8_t savedNetworksCount) {
