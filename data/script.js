@@ -36,6 +36,10 @@ function fetchCurrentFrequency() {
 
 function setFrequency() {
     const frequency = document.getElementById('frequency-input').value;
+    if (!frequency) {
+        alert('Please enter a frequency.');
+        return;
+    }
     fetch(`/setFrequency?freq=${frequency}`)
         .then(response => response.text())
         .then(data => {
@@ -189,6 +193,10 @@ function selectNetwork(ssid) {
 function connectToWiFi() {
     const ssid = document.getElementById('wifi-ssid').value;
     const password = document.getElementById('wifi-password').value;
+    if (!ssid) {
+        alert('Please enter an SSID.');
+        return;
+    }
     fetch(`/connectToWiFi?ssid=${encodeURIComponent(ssid)}&password=${encodeURIComponent(password)}`)
         .then(response => response.text())
         .then(data => {
@@ -200,6 +208,10 @@ function connectToWiFi() {
 function addWiFiCredentials() {
     const ssid = document.getElementById('wifi-ssid').value;
     const password = document.getElementById('wifi-password').value;
+    if (!ssid) {
+        alert('Please enter an SSID.');
+        return;
+    }
     fetch(`/addWiFiCredentials?ssid=${encodeURIComponent(ssid)}&password=${encodeURIComponent(password)}`)
         .then(response => response.text())
         .then(data => {
@@ -249,6 +261,46 @@ function connectToSavedWiFi(ssid) {
         });
 }
 
+function startAP() {
+    const ssid = document.getElementById('ap-ssid').value;
+    const password = document.getElementById('ap-password').value;
+    if (!ssid) {
+        alert('Please enter an SSID for the Access Point.');
+        return;
+    }
+    fetch(`/startAP?ssid=${encodeURIComponent(ssid)}&password=${encodeURIComponent(password)}`)
+        .then(response => response.text())
+        .then(data => {
+            alert(data);
+            fetchAPInfo();
+        });
+}
+
+function stopAP() {
+    fetch('/stopAP')
+        .then(response => response.text())
+        .then(data => {
+            alert(data);
+            fetchAPInfo();
+        });
+}
+
+function fetchAPInfo() {
+    fetch('/printAPInfo')
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById('ap-info').innerText = data;
+        });
+}
+
+function printConnectedDevices() {
+    fetch('/printConnectedDevices')
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById('connected-devices').innerText = data;
+        });
+}
+
 function fetchRDSInfo() {
     fetch('/getRDSInfo')
         .then(response => response.text())
@@ -285,6 +337,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
     startSystemStatsUpdate();
     fetchWiFiDetails();
     fetchSavedWiFiCredentials();
+    fetchAPInfo();
 });
 
 function showSection(sectionId) {

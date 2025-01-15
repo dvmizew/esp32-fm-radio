@@ -73,7 +73,7 @@
         </div>
         <div id="settings-section" class="section" style="display:none;">
             <h2>Settings</h2>
-            <h3>Wi-Fi</h3>
+            <h3>Wi-Fi Station Mode</h3>
             <p>
                 <label for="wifi-ssid">SSID:</label>
                 <input type="text" id="wifi-ssid" placeholder="Enter SSID">
@@ -94,6 +94,22 @@
             <ul id="saved-networks-list"></ul>
             <button onclick="fetchSavedWiFiCredentials()">Fetch Saved Wi-Fi Networks</button>
             <button onclick="clearWiFiCredentials()">Clear All Wi-Fi Credentials</button>
+            <h3>Wi-Fi Access Point Mode</h3>
+            <p>
+                <label for="ap-ssid">AP SSID:</label>
+                <input type="text" id="ap-ssid" placeholder="Enter AP SSID">
+            </p>
+            <p>
+                <label for="ap-password">AP Password:</label>
+                <input type="password" id="ap-password" placeholder="Enter AP Password">
+            </p>
+            <button onclick="startAP()">Start Access Point</button>
+            <button onclick="stopAP()">Stop Access Point</button>
+            <h3>Access Point Info</h3>
+            <p id="ap-info"></p>
+            <h3>Connected Devices</h3>
+            <button onclick="printConnectedDevices()">Print Connected Devices</button>
+            <p id="connected-devices"></p>
             <h3>System</h3>
             <p>
                 <label for="device-name">Device Name:</label>

@@ -213,6 +213,10 @@ void setupWebServer() {
         if (request->hasParam("ssid") && request->hasParam("password")) {
             String ssid = request->getParam("ssid")->value();
             String password = request->getParam("password")->value();
+            if (ssid.isEmpty() || password.isEmpty()) {
+                request->send(400, "text/plain", "SSID or password cannot be empty");
+                return;
+            }
             connectToWiFiNetwork(ssid.c_str(), password.c_str());
             request->send(200, "text/plain", "Connecting to Wi-Fi...");
         } else {
@@ -224,6 +228,10 @@ void setupWebServer() {
         if (request->hasParam("ssid") && request->hasParam("password")) {
             String ssid = request->getParam("ssid")->value();
             String password = request->getParam("password")->value();
+            if (ssid.isEmpty() || password.isEmpty()) {
+                request->send(400, "text/plain", "SSID or password cannot be empty");
+                return;
+            }
             addWiFiCredentials(savedNetworks, &savedNetworksCount, &nextID, ssid.c_str(), password.c_str());
             request->send(200, "text/plain", "Wi-Fi credentials added");
         } else {
@@ -276,6 +284,10 @@ void setupWebServer() {
         if (request->hasParam("ssid") && request->hasParam("password")) {
             String ssid = request->getParam("ssid")->value();
             String password = request->getParam("password")->value();
+            if (ssid.isEmpty() || password.isEmpty()) {
+                request->send(400, "text/plain", "SSID or password cannot be empty");
+                return;
+            }
             startAP(ssid.c_str(), password.c_str());
             request->send(200, "text/plain", "Access point started");
         } else {

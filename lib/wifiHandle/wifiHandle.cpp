@@ -3,6 +3,8 @@
 WiFiCredentials savedNetworks[MAX_NETWORKS];
 uint8_t savedNetworksCount = 0;
 uint8_t nextID = 1;
+String previousSSID;
+String previousPassword;
 
 // timer functions
 volatile unsigned long timer1_millis = 0;
@@ -13,27 +15,12 @@ void IRAM_ATTR onTimer1() {
     timer1_millis++;
 }
 
-void IRAM_ATTR onTimer2() {
-    // perform periodic Wi-Fi status check or other tasks
-    if (WiFi.status() == WL_CONNECTED) {
-        Serial.println(F("Wi-Fi is connected"));
-    } else {
-        Serial.println(F("Wi-Fi is not connected"));
-    }
-}
-
 void initTimers() {
     // initialize Timer1 for custom millis
     timer1 = timerBegin(0, 80, true); // timer 0, prescaler 80, count up
     timerAttachInterrupt(timer1, &onTimer1, true);
     timerAlarmWrite(timer1, 1000, true); // 1ms interval
     timerAlarmEnable(timer1);
-
-    // initialize Timer2 for periodic tasks
-    timer2 = timerBegin(1, 80, true); // timer 1, prescaler 80, count up
-    timerAttachInterrupt(timer2, &onTimer2, true);
-    timerAlarmWrite(timer2, 5000000, true); // 5 seconds interval
-    timerAlarmEnable(timer2);
 }
 
 unsigned long customMillis() {
@@ -50,10 +37,30 @@ void printWiFiConnectionDetails() {
 
 // STATION MODE
 void scanWiFiNetworks() {
+    if (isWiFiConnected()) {
+        // save current network details
+        previousSSID = WiFi.SSID();
+        previousPassword = WiFi.psk();
+        // disconnect from the current network
+        if (!WiFi.disconnect()) {
+            Serial.println(F("Failed to disconnect from the current network."));
+            return;
+        }
+        delay(1000); // allow some time for disconnection
+    }
+
     int n = WiFi.scanNetworks();
+    if (n == WIFI_SCAN_FAILED) {
+        Serial.println(F("Wi-Fi scan failed."));
+        return;
+    }
     Serial.printf_P(PSTR("Number of networks found: %d\n"), n);
     for (int i = 0; i < n; ++i) {
         Serial.printf_P(PSTR("%d: %s (%d)\n"), i + 1, WiFi.SSID(i).c_str(), WiFi.RSSI(i));
+    }
+
+    if (!previousSSID.isEmpty()) {
+        connectToWiFiNetwork(previousSSID.c_str(), previousPassword.c_str());
     }
 }
 

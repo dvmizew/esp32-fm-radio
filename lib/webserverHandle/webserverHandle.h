@@ -2,6 +2,7 @@
 #define WEB_SERVER_HANDLE_H
 
 #include <ESPAsyncWebServer.h> // for web server (main library)
+#include <ArduinoJson.h> // for JSON parsing
 #include <SPIFFS.h> // for saving the web interface files
 #include <FS.h> // file system
 #include <AsyncTCP.h> // for TCP connection
