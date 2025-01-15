@@ -522,19 +522,19 @@ body.dark-mode .dark-mode-toggle:hover {
     margin: 5px;
 }
 
-/* Styles for the radio stations list */
-#radio-stations-list {
+/* Add styles for the radio stations list */
+#radio-stations-list, #saved-stations-list {
     list-style-type: none;
     padding: 0;
     margin: 10px 0;
 }
 
-#radio-stations-list li {
+#radio-stations-list li, #saved-stations-list li {
     margin: 5px 0;
     font-size: 16px;
     color: #0056b3;
 }
 
-body.dark-mode #radio-stations-list li {
+body.dark-mode #radio-stations-list li, body.dark-mode #saved-stations-list li {
     color: #bb86fc;
 }

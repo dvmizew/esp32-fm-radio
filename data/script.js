@@ -5,6 +5,15 @@ function toggleRadio() {
         .then(data => {
             console.log(data);
             alert(data);
+            updateRadioStatus();
+        });
+}
+
+function updateRadioStatus() {
+    fetch('/getRadioStatus')
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById('radio-status').innerText = data;
         });
 }
 
@@ -70,12 +79,13 @@ function searchRadioStations() {
         });
 }
 
-function printRadioStations() {
-    fetch('/printRadioStations')
+function saveRadioStations() {
+    fetch('/saveRadioStations')
         .then(response => response.text())
         .then(data => {
             console.log(data);
-            alert('Radio stations printed to console.');
+            alert('Radio stations saved.');
+            fetchSavedRadioStations();
         });
 }
 
@@ -87,12 +97,25 @@ function fetchRadioStations() {
             stationsList.innerHTML = '';
             data.forEach(station => {
                 const listItem = document.createElement('li');
-                listItem.innerText = `${station.frequency} MHz`;
+                listItem.innerHTML = `${station.frequency} MHz <button onclick="setStationFrequency(${station.frequency})">Listen</button>`;
                 stationsList.appendChild(listItem);
             });
         });
 }
 
+function fetchSavedRadioStations() {
+    fetch('/getSavedRadioStations')
+        .then(response => response.json())
+        .then(data => {
+            const savedStationsList = document.getElementById('saved-stations-list');
+            savedStationsList.innerHTML = '';
+            data.forEach(station => {
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `${station.frequency} MHz <button onclick="setStationFrequency(${station.frequency})">Listen</button>`;
+                savedStationsList.appendChild(listItem);
+            });
+        });
+}
 // bluetooth control functions
 function toggleBluetooth() {
     fetch('/toggleBluetooth')
@@ -100,6 +123,14 @@ function toggleBluetooth() {
         .then(data => {
             console.log(data);
             alert(data);
+        });
+}
+
+function updateBluetoothStatus() {
+    fetch('/getBluetoothStatus')
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById('bluetooth-status').innerText = data;
         });
 }
 
@@ -378,6 +409,7 @@ function startSystemStatsUpdate() {
 
 // js things
 document.addEventListener('DOMContentLoaded', (event) => {
+    updateRadioStatus();
     fetchCurrentFrequency();
     fetchSignalStrength();
     fetchRadioStations();
@@ -387,6 +419,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
     fetchWiFiDetails();
     fetchSavedWiFiCredentials();
     fetchAPInfo();
+    updateBluetoothStatus();
 });
 
 function showSection(sectionId) {

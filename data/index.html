@@ -24,6 +24,7 @@
         <div id="radio-section" class="section">
             <h2>Radio</h2>
             <button onclick="toggleRadio()">Toggle Radio</button>
+            <p>Radio status: <span id="radio-status">Off</span></p>
             <p>Current station: <span id="frequency">107.5</span> MHz</p>
             <p>Signal level: <span id="signal-level">N/A</span></p>
             <div class="buttons">
@@ -55,12 +56,15 @@
             </div>
             <h3>Radio Stations</h3>
             <button onclick="searchRadioStations()">Search Radio Stations</button>
-            <button onclick="printRadioStations()">Print Radio Stations</button>
+            <button onclick="saveRadioStations()">Save Radio Stations</button>
             <ul id="radio-stations-list"></ul>
+            <h3>Saved Stations</h3>
+            <ul id="saved-stations-list"></ul>
         </div>
         <div id="bluetooth-section" class="section" style="display:none;">
             <h2>Bluetooth Speaker</h2>
             <button onclick="toggleBluetooth()">Toggle Bluetooth</button>
+            <p>Bluetooth status: <span id="bluetooth-status">Off</span></p>
             <div class="media-player">
                 <div class="media-info">
                     <h3>Now Playing</h3>

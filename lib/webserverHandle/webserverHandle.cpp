@@ -68,6 +68,11 @@ void setupWebServer() {
         }
     });
 
+    server.on("/getRadioStatus", HTTP_GET, [](AsyncWebServerRequest *request){
+        String status = radioEnabled ? "On" : "Off";
+        request->send(200, "text/plain", status);
+    });
+
     server.on("/increaseFrequency", HTTP_GET, [](AsyncWebServerRequest *request){
         increaseRadioFrequency();
         request->send(200, "text/plain", "Frequency increased");
@@ -137,6 +142,11 @@ void setupWebServer() {
             request->send(200, "text/plain", "Bluetooth disabled");
             Serial.println(F("Bluetooth disabled"));
         }
+    });
+
+    server.on("/getBluetoothStatus", HTTP_GET, [](AsyncWebServerRequest *request){
+        String status = bluetoothEnabled ? "On" : "Off";
+        request->send(200, "text/plain", status);
     });
 
     server.on("/getNowPlaying", HTTP_GET, [](AsyncWebServerRequest *request){
