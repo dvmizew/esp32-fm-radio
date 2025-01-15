@@ -100,7 +100,6 @@ void test_setRadioFrequency() {
     TEST_ASSERT_EQUAL_FLOAT(100.0, getFrequency());
 }
 
-// Combined test case for adding and removing WiFi credentials
 void test_addRemoveWiFiCredentials() {
     // Add WiFi credentials
     addWiFiCredentials(savedNetworks, &savedNetworksCount, &nextID, ssid, password);
@@ -137,6 +136,79 @@ void test_initSPIFFS() {
     TEST_ASSERT_TRUE(SPIFFS.begin());
 }
 
+// Test case for memory corruption
+void test_memoryCorruption() {
+    // Check initial free heap
+    size_t initialFreeHeap = ESP.getFreeHeap();
+    Serial.printf("Initial free heap: %d\n", initialFreeHeap);
+
+    // Allocate and deallocate memory
+    const size_t testSize = 1024;
+    uint8_t* testMemory = (uint8_t*)malloc(testSize);
+    TEST_ASSERT_NOT_NULL(testMemory);
+    memset(testMemory, 0xAA, testSize);
+    free(testMemory);
+
+    // Check free heap after allocation and deallocation
+    size_t finalFreeHeap = ESP.getFreeHeap();
+    Serial.printf("Final free heap: %d\n", finalFreeHeap);
+
+    // Check for heap integrity
+    TEST_ASSERT_EQUAL(initialFreeHeap, finalFreeHeap);
+
+    // Monitor stack usage
+    size_t stackHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
+    Serial.printf("Stack high water mark: %d\n", stackHighWaterMark);
+    TEST_ASSERT_GREATER_THAN(100, stackHighWaterMark); // Ensure at least 100 bytes of stack space remain
+}
+
+// Combined test case for web server, Bluetooth, Wi-Fi, and radio working together
+void test_combinedFunctionality() {
+    // Cleanup before test
+    WiFi.disconnect(true);
+    delay(1000); // Allow some time for disconnection
+    if (bluetoothSpeakerInitialized) {
+        disableBluetoothSpeaker();
+        bluetoothSpeakerInitialized = false;
+    }
+
+    // Check initial free heap
+    size_t initialFreeHeap = ESP.getFreeHeap();
+    Serial.printf("Initial free heap: %d\n", initialFreeHeap);
+
+    // Initialize and start web server
+    initSPIFFS();
+    setupWebServer();
+
+    // Initialize and start Bluetooth
+    initializeBluetoothSpeaker();
+    TEST_ASSERT_TRUE(bluetoothSpeakerInitialized);
+
+    // Connect to WiFi network
+    connectToWiFiNetwork(ssid, password);
+    TEST_ASSERT_TRUE(isWiFiConnected());
+
+    // Initialize and start radio
+    initRadio();
+    TEST_ASSERT_EQUAL_FLOAT(107.5, getFrequency());
+
+    // Check free heap after initialization
+    size_t finalFreeHeap = ESP.getFreeHeap();
+    Serial.printf("Final free heap: %d\n", finalFreeHeap);
+
+    // Check for heap integrity
+    TEST_ASSERT_GREATER_THAN(initialFreeHeap - 5000, finalFreeHeap); // Ensure no significant memory leak
+
+    // Monitor stack usage
+    size_t stackHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
+    Serial.printf("Stack high water mark: %d\n", stackHighWaterMark);
+    TEST_ASSERT_GREATER_THAN(100, stackHighWaterMark); // Ensure at least 100 bytes of stack space remain
+
+    // Clean up
+    WiFi.disconnect();
+    TEST_ASSERT_FALSE(isWiFiConnected());
+}
+
 void setup() {
     UNITY_BEGIN();
     RUN_TEST(test_initDisplay);
@@ -150,6 +222,8 @@ void setup() {
     RUN_TEST(test_addRemoveWiFiCredentials);
     RUN_TEST(test_initializeBluetoothSpeaker);
     RUN_TEST(test_initSPIFFS);
+    RUN_TEST(test_memoryCorruption);
+    RUN_TEST(test_combinedFunctionality);
     UNITY_END();
 }
 
