@@ -1,10 +1,10 @@
 #include "radioHandle.h"
 
-static char currentStation[10] = "107.5 FM";
-static float frequency = 107.5;
-static radioStation stations[MAX_RADIO_STATIONS]; // array of radio stations found during search
-static TEA5767 radio;
-static TaskHandle_t radioControlTaskHandle = NULL;
+char currentStation[10] = "107.5 FM";
+float frequency = 107.5;
+radioStation stations[MAX_RADIO_STATIONS]; // array of radio stations found during search
+TEA5767 radio;
+TaskHandle_t radioControlTaskHandle = NULL;
 
 void setupRadio() {
     // start I2C bus with radio pins

@@ -17,6 +17,13 @@ struct radioStation {
     float frequency;
 };
 
+extern TEA5767 radio;
+extern TaskHandle_t radioControlTaskHandle;
+
+extern radioStation stations[MAX_RADIO_STATIONS];
+extern char currentStation[10];
+extern float frequency;
+
 void setupRadio();
 void initRadio();
 void enableRadio();

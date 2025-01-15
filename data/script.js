@@ -12,7 +12,7 @@ function fetchSignalStrength() {
     fetch('/getSignalStrength')
         .then(response => response.text())
         .then(data => {
-            document.getElementById('signal-strength').innerText = data;
+            document.getElementById('signal-level').innerText = data;
         });
 }
 
@@ -23,6 +23,7 @@ function changeStation(increase) {
         .then(data => {
             console.log(data);
             fetchCurrentFrequency();
+            fetchSignalStrength();
         });
 }
 
@@ -45,6 +46,7 @@ function setFrequency() {
         .then(data => {
             console.log(data);
             fetchCurrentFrequency();
+            fetchSignalStrength();
         });
 }
 
@@ -54,6 +56,40 @@ function setStationFrequency(frequency) {
         .then(data => {
             console.log(data);
             fetchCurrentFrequency();
+            fetchSignalStrength();
+        });
+}
+
+function searchRadioStations() {
+    fetch('/searchRadioStations')
+        .then(response => response.text())
+        .then(data => {
+            console.log(data);
+            alert('Radio stations search completed.');
+            fetchRadioStations();
+        });
+}
+
+function printRadioStations() {
+    fetch('/printRadioStations')
+        .then(response => response.text())
+        .then(data => {
+            console.log(data);
+            alert('Radio stations printed to console.');
+        });
+}
+
+function fetchRadioStations() {
+    fetch('/getRadioStations')
+        .then(response => response.json())
+        .then(data => {
+            const stationsList = document.getElementById('radio-stations-list');
+            stationsList.innerHTML = '';
+            data.forEach(station => {
+                const listItem = document.createElement('li');
+                listItem.innerText = `${station.frequency} MHz`;
+                stationsList.appendChild(listItem);
+            });
         });
 }
 
@@ -64,6 +100,16 @@ function toggleBluetooth() {
         .then(data => {
             console.log(data);
             alert(data);
+        });
+}
+
+function fetchNowPlaying() {
+    fetch('/getNowPlaying')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('current-title').innerText = data.title;
+            document.getElementById('current-artist').innerText = data.artist;
+            document.getElementById('current-album').innerText = data.album;
         });
 }
 
@@ -333,6 +379,9 @@ function startSystemStatsUpdate() {
 // js things
 document.addEventListener('DOMContentLoaded', (event) => {
     fetchCurrentFrequency();
+    fetchSignalStrength();
+    fetchRadioStations();
+    fetchNowPlaying();
     fetchCurrentVolume();
     startSystemStatsUpdate();
     fetchWiFiDetails();

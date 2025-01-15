@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ESP32inatorul</title>
+    <title>ESP32 Media Player</title>
     <link rel="stylesheet" href="style.css">
     <script src="script.js"></script>
 </head>
 <body>
     <div class="sidebar">
-        <h1>ESP32inatorul</h1>
+        <h1>ESP32 Media Player</h1>
         <button class="dark-mode-toggle" onclick="toggleDarkMode()">Toggle Dark Mode</button>
         <nav>
             <ul>
@@ -25,6 +25,7 @@
             <h2>Radio</h2>
             <button onclick="toggleRadio()">Toggle Radio</button>
             <p>Current station: <span id="frequency">107.5</span> MHz</p>
+            <p>Signal level: <span id="signal-level">N/A</span></p>
             <div class="buttons">
                 <button onclick="changeStation(true)">+0.1 MHz</button>
                 <button onclick="changeStation(false)">-0.1 MHz</button>
@@ -52,19 +53,31 @@
                 <p><a href="#" onclick="fetchSignalStrength()">View Signal Strength</a></p>
                 <p id="signal-strength"></p>
             </div>
+            <h3>Radio Stations</h3>
+            <button onclick="searchRadioStations()">Search Radio Stations</button>
+            <button onclick="printRadioStations()">Print Radio Stations</button>
+            <ul id="radio-stations-list"></ul>
         </div>
         <div id="bluetooth-section" class="section" style="display:none;">
             <h2>Bluetooth Speaker</h2>
             <button onclick="toggleBluetooth()">Toggle Bluetooth</button>
-            <div class="buttons">
-                <button onclick="playPreviousTrack()">Previous Track</button>
-                <button onclick="togglePlayback()">Play/Pause</button>
-                <button onclick="playNextTrack()">Next Track</button>
-            </div>
-            <p>Volume: <span id="bt-volume">50</span></p>
-            <div class="buttons">
-                <button onclick="volumeUp()">Volume +</button>
-                <button onclick="volumeDown()">Volume -</button>
+            <div class="media-player">
+                <div class="media-info">
+                    <h3>Now Playing</h3>
+                    <p>Title: <span id="current-title">N/A</span></p>
+                    <p>Artist: <span id="current-artist">N/A</span></p>
+                    <p>Album: <span id="current-album">N/A</span></p>
+                </div>
+                <div class="media-controls">
+                    <button onclick="playPreviousTrack()">&#9664;&#9664;</button>
+                    <button onclick="togglePlayback()">&#9654;/&#10074;&#10074;</button>
+                    <button onclick="playNextTrack()">&#9654;&#9654;</button>
+                </div>
+                <div class="volume-controls">
+                    <p>Volume: <span id="bt-volume">50</span></p>
+                    <button onclick="volumeUp()">Volume +</button>
+                    <button onclick="volumeDown()">Volume -</button>
+                </div>
             </div>
         </div>
         <div id="system-stats-section" class="section" style="display:none;">

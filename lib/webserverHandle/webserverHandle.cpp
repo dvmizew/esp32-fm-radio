@@ -49,6 +49,7 @@ void setupWebServer() {
     static bool radioEnabled = false;
     static bool bluetoothEnabled = false;
 
+    // radio endpoints
     server.on("/toggleRadio", HTTP_GET, [](AsyncWebServerRequest *request){
         radioEnabled = !radioEnabled;
         if (radioEnabled) {
@@ -67,27 +68,6 @@ void setupWebServer() {
         }
     });
 
-    server.on("/toggleBluetooth", HTTP_GET, [](AsyncWebServerRequest *request){
-        bluetoothEnabled = !bluetoothEnabled;
-        if (bluetoothEnabled) {
-            if (radioEnabled) {
-                disableRadio();
-                radioEnabled = false;
-                Serial.println(F("Radio disabled"));
-            }
-            Serial.println(F("Enabling Bluetooth..."));
-            initializeBluetoothSpeaker();
-            request->send(200, "text/plain", "Bluetooth enabled");
-            Serial.println(F("Bluetooth enabled"));
-        } else {
-            Serial.println(F("Disabling Bluetooth..."));
-            deinitializeBluetoothSpeaker();
-            request->send(200, "text/plain", "Bluetooth disabled");
-            Serial.println(F("Bluetooth disabled"));
-        }
-    });
-
-    // radio endpoints
     server.on("/increaseFrequency", HTTP_GET, [](AsyncWebServerRequest *request){
         increaseRadioFrequency();
         request->send(200, "text/plain", "Frequency increased");
@@ -116,7 +96,58 @@ void setupWebServer() {
         request->send(200, "text/plain", String(getSignalLevel()));
     });
 
+    server.on("/searchRadioStations", HTTP_GET, [](AsyncWebServerRequest *request){
+        searchRadioStations();
+        request->send(200, "text/plain", "Radio stations search started.");
+    });
+
+    server.on("/printRadioStations", HTTP_GET, [](AsyncWebServerRequest *request){
+        printRadioStations();
+        request->send(200, "text/plain", "Radio stations printed to console.");
+    });
+
+    server.on("/getRadioStations", HTTP_GET, [](AsyncWebServerRequest *request){
+        String json = "[";
+        for (int i = 0; i < MAX_RADIO_STATIONS; ++i) {
+            if (i > 0) json += ",";
+            json += "{";
+            json += "\"frequency\":" + String(stations[i].frequency);
+            json += "}";
+        }
+        json += "]";
+        request->send(200, "application/json", json);
+    });
+
     // bluetooth control endpoints
+    server.on("/toggleBluetooth", HTTP_GET, [](AsyncWebServerRequest *request){
+        bluetoothEnabled = !bluetoothEnabled;
+        if (bluetoothEnabled) {
+            if (radioEnabled) {
+                disableRadio();
+                radioEnabled = false;
+                Serial.println(F("Radio disabled"));
+            }
+            Serial.println(F("Enabling Bluetooth..."));
+            startBluetoothTask();
+            request->send(200, "text/plain", "Bluetooth enabled");
+            Serial.println(F("Bluetooth enabled"));
+        } else {
+            Serial.println(F("Disabling Bluetooth..."));
+            disableBluetoothSpeaker();
+            request->send(200, "text/plain", "Bluetooth disabled");
+            Serial.println(F("Bluetooth disabled"));
+        }
+    });
+
+    server.on("/getNowPlaying", HTTP_GET, [](AsyncWebServerRequest *request){
+        String json = "{";
+        json += "\"title\":\"" + currentTitle + "\",";
+        json += "\"artist\":\"" + currentArtist + "\",";
+        json += "\"album\":\"" + currentAlbum + "\"";
+        json += "}";
+        request->send(200, "application/json", json);
+    });
+
     server.on("/playNextTrack", HTTP_GET, [](AsyncWebServerRequest *request){
         playNextTrack();
         request->send(200, "text/plain", "Next track");
