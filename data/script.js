@@ -1,16 +1,18 @@
+// radio control functions
 function toggleRadio() {
     fetch('/toggleRadio')
         .then(response => response.text())
         .then(data => {
             console.log(data);
+            alert(data);
         });
 }
 
-function toggleBluetooth() {
-    fetch('/toggleBluetooth')
+function fetchSignalStrength() {
+    fetch('/getSignalStrength')
         .then(response => response.text())
         .then(data => {
-            console.log(data);
+            document.getElementById('signal-strength').innerText = data;
         });
 }
 
@@ -24,29 +26,11 @@ function changeStation(increase) {
         });
 }
 
-function adjustVolume(increase) {
-    const endpoint = increase ? '/volumeUp' : '/volumeDown';
-    fetch(endpoint)
-        .then(response => response.text())
-        .then(data => {
-            console.log(data);
-            fetchCurrentVolume();
-        });
-}
-
 function fetchCurrentFrequency() {
     fetch('/getFrequency')
         .then(response => response.text())
         .then(data => {
             document.getElementById('frequency').innerText = data;
-        });
-}
-
-function fetchCurrentVolume() {
-    fetch('/getVolume')
-        .then(response => response.text())
-        .then(data => {
-            document.getElementById('volume').innerText = data;
         });
 }
 
@@ -66,6 +50,52 @@ function setStationFrequency(frequency) {
         .then(data => {
             console.log(data);
             fetchCurrentFrequency();
+        });
+}
+
+// bluetooth control functions
+function toggleBluetooth() {
+    fetch('/toggleBluetooth')
+        .then(response => response.text())
+        .then(data => {
+            console.log(data);
+            alert(data);
+        });
+}
+
+function fetchCurrentVolume() {
+    fetch('/getVolume')
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById('volume').innerText = data;
+        });
+}
+
+function adjustVolume(increase) {
+    const endpoint = increase ? '/volumeUp' : '/volumeDown';
+    fetch(endpoint)
+        .then(response => response.text())
+        .then(data => {
+            console.log(data);
+            fetchCurrentVolume();
+        });
+}
+
+function volumeUp() {
+    fetch('/volumeUp')
+        .then(response => response.text())
+        .then(data => {
+            console.log(data);
+            fetchCurrentVolume();
+        });
+}
+
+function volumeDown() {
+    fetch('/volumeDown')
+        .then(response => response.text())
+        .then(data => {
+            console.log(data);
+            fetchCurrentVolume();
         });
 }
 
@@ -93,36 +123,7 @@ function togglePlayback() {
         });
 }
 
-function volumeUp() {
-    fetch('/volumeUp')
-        .then(response => response.text())
-        .then(data => {
-            console.log(data);
-            fetchCurrentVolume();
-        });
-}
-
-function volumeDown() {
-    fetch('/volumeDown')
-        .then(response => response.text())
-        .then(data => {
-            console.log(data);
-            fetchCurrentVolume();
-        });
-}
-
-function showSection(sectionId) {
-    const sections = document.querySelectorAll('.section');
-    sections.forEach(section => {
-        section.style.display = 'none';
-    });
-    document.getElementById(sectionId).style.display = 'block';
-}
-
-function toggleDarkMode() {
-    document.body.classList.toggle('dark-mode');
-}
-
+// system control functions
 function restartESP() {
     fetch('/restart')
         .then(response => {
@@ -154,6 +155,7 @@ function fetchSystemStats() {
         });
 }
 
+// wifi control functions
 function fetchWiFiDetails() {
     fetch('/getWiFiDetails')
         .then(response => response.json())
@@ -172,10 +174,16 @@ function scanWiFiNetworks() {
             networksList.innerHTML = '';
             data.forEach(network => {
                 const listItem = document.createElement('li');
-                listItem.textContent = `${network.ssid} (${network.rssi} dBm)`;
+                listItem.innerHTML = `${network.ssid} (${network.rssi} dBm) <button onclick="selectNetwork('${network.ssid}')">Select</button>`;
                 networksList.appendChild(listItem);
             });
         });
+}
+
+function selectNetwork(ssid) {
+    document.getElementById('wifi-ssid').value = ssid;
+    document.getElementById('wifi-password').value = '';
+    alert(`Selected network: ${ssid}. Please enter the password if required.`);
 }
 
 function connectToWiFi() {
@@ -200,8 +208,7 @@ function addWiFiCredentials() {
         });
 }
 
-function removeWiFiCredentials() {
-    const ssid = document.getElementById('wifi-ssid').value;
+function removeWiFiCredentials(ssid) {
     fetch(`/removeWiFiCredentials?ssid=${encodeURIComponent(ssid)}`)
         .then(response => response.text())
         .then(data => {
@@ -227,9 +234,42 @@ function fetchSavedWiFiCredentials() {
             savedNetworksList.innerHTML = '';
             data.forEach(network => {
                 const listItem = document.createElement('li');
-                listItem.textContent = `${network.ssid} (ID: ${network.id})`;
+                listItem.innerHTML = `${network.ssid} (ID: ${network.id}) <button onclick="connectToSavedWiFi('${network.ssid}')">Connect</button> <button onclick="removeWiFiCredentials('${network.ssid}')">Remove</button>`;
                 savedNetworksList.appendChild(listItem);
             });
+        });
+}
+
+function connectToSavedWiFi(ssid) {
+    fetch(`/connectToWiFi?ssid=${encodeURIComponent(ssid)}&password=`)
+        .then(response => response.text())
+        .then(data => {
+            alert(data);
+            fetchWiFiDetails();
+        });
+}
+
+function fetchRDSInfo() {
+    fetch('/getRDSInfo')
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById('rds-info').innerText = data;
+        });
+}
+
+function fetchWeather() {
+    fetch('/getWeather')
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById('weather-info').innerText = data;
+        });
+}
+
+function connectToInternetRadio() {
+    fetch('/connectToInternetRadio')
+        .then(response => response.text())
+        .then(data => {
+            alert(data);
         });
 }
 
@@ -238,6 +278,7 @@ function startSystemStatsUpdate() {
     setInterval(fetchSystemStats, 1000); // update every second
 }
 
+// js things
 document.addEventListener('DOMContentLoaded', (event) => {
     fetchCurrentFrequency();
     fetchCurrentVolume();
@@ -245,3 +286,15 @@ document.addEventListener('DOMContentLoaded', (event) => {
     fetchWiFiDetails();
     fetchSavedWiFiCredentials();
 });
+
+function showSection(sectionId) {
+    const sections = document.querySelectorAll('.section');
+    sections.forEach(section => {
+        section.style.display = 'none';
+    });
+    document.getElementById(sectionId).style.display = 'block';
+}
+
+function toggleDarkMode() {
+    document.body.classList.toggle('dark-mode');
+}

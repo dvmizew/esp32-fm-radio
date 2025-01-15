@@ -272,6 +272,39 @@ void setupWebServer() {
         request->send(200, "application/json", json);
     });
 
+    server.on("/startAP", HTTP_GET, [](AsyncWebServerRequest *request){
+        if (request->hasParam("ssid") && request->hasParam("password")) {
+            String ssid = request->getParam("ssid")->value();
+            String password = request->getParam("password")->value();
+            startAP(ssid.c_str(), password.c_str());
+            request->send(200, "text/plain", "Access point started");
+        } else {
+            request->send(400, "text/plain", "SSID or password parameter missing");
+        }
+    });
+
+    server.on("/stopAP", HTTP_GET, [](AsyncWebServerRequest *request){
+        stopAP();
+        request->send(200, "text/plain", "Access point stopped");
+    });
+
+    server.on("/printAPInfo", HTTP_GET, [](AsyncWebServerRequest *request){
+        String info;
+        info += "AP SSID: " + WiFi.softAPSSID() + "\n";
+        info += "AP IP: " + WiFi.softAPIP().toString() + "\n";
+        request->send(200, "text/plain", info);
+    });
+
+    server.on("/printConnectedDevices", HTTP_GET, [](AsyncWebServerRequest *request){
+        printConnectedDevices();
+        request->send(200, "text/plain", "Connected devices printed to Serial");
+    });
+
+    server.on("/getDevicesCount", HTTP_GET, [](AsyncWebServerRequest *request){
+        int count = getDevicesCount();
+        request->send(200, "text/plain", String(count));
+    });
+
     server.begin();
     Serial.println(F("Web server started"));
 }
