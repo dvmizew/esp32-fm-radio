@@ -82,6 +82,7 @@ void startBluetoothTask() {
 }
 
 void bluetoothTask(void *pvParameters) {
+    initializeBluetoothSpeaker();
     setupButtons();
     unsigned long nextButtonPressTime = 0;
     unsigned long prevButtonPressTime = 0;
