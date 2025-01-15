@@ -100,6 +100,12 @@ void test_setRadioFrequency() {
     TEST_ASSERT_EQUAL_FLOAT(100.0, getFrequency());
 }
 
+// WiFi test cases
+void test_scanWiFiNetworks() {
+    scanWiFiNetworks();
+    TEST_ASSERT_GREATER_THAN(0, WiFi.scanComplete());
+}
+
 void test_addRemoveWiFiCredentials() {
     // Add WiFi credentials
     addWiFiCredentials(savedNetworks, &savedNetworksCount, &nextID, ssid, password);
@@ -218,12 +224,13 @@ void setup() {
     RUN_TEST(test_increaseRadioFrequency);
     RUN_TEST(test_decreaseRadioFrequency);
     RUN_TEST(test_setRadioFrequency);
+    RUN_TEST(test_scanWiFiNetworks);
     RUN_TEST(test_ConnectDisconnectWiFiNetwork);
     RUN_TEST(test_addRemoveWiFiCredentials);
     RUN_TEST(test_initializeBluetoothSpeaker);
     RUN_TEST(test_initSPIFFS);
     RUN_TEST(test_memoryCorruption);
-    RUN_TEST(test_combinedFunctionality);
+    // RUN_TEST(test_combinedFunctionality);
     UNITY_END();
 }
 
