@@ -3,6 +3,8 @@
 
 #include <Arduino.h>
 #include <WiFi.h>
+#include <esp_wifi.h>
+#include "hardware.h"
 
 #define MAX_NETWORKS 10 // maximum number of networks to store
 #define MAX_SSID_LEN 32 // maximum length of SSID

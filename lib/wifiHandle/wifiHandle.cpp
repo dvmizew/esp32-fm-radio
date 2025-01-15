@@ -127,13 +127,21 @@ bool isWiFiConnected() {
 
 // AP MODE
 void startAP(const char* ssid, const char* password) {
-    WiFi.softAP(ssid, password);
-    Serial.println(F("Access point started."));
+    WiFi.mode(WIFI_AP);
+    if (WiFi.softAP(ssid, password)) {
+        Serial.println(F("Access point started."));
+        printAPInfo();
+    } else {
+        Serial.println(F("Failed to start access point."));
+    }
 }
 
 void stopAP() {
-    WiFi.softAPdisconnect();
-    Serial.println(F("Access point stopped."));
+    if (WiFi.softAPdisconnect(true)) {
+        Serial.println(F("Access point stopped."));
+    } else {
+        Serial.println(F("Failed to stop access point."));
+    }
 }
 
 void printAPInfo() {
@@ -142,10 +150,31 @@ void printAPInfo() {
 }
 
 void printConnectedDevices() {
-    // TODO
+    wifi_sta_list_t wifi_sta_list;
+    tcpip_adapter_sta_list_t adapter_sta_list;
+
+    if (esp_wifi_ap_get_sta_list(&wifi_sta_list) == ESP_OK && tcpip_adapter_get_sta_list(&wifi_sta_list, &adapter_sta_list) == ESP_OK) {
+        Serial.printf_P(PSTR("Number of connected devices: %d\n"), adapter_sta_list.num);
+        for (int i = 0; i < adapter_sta_list.num; i++) {
+            tcpip_adapter_sta_info_t station = adapter_sta_list.sta[i];
+            Serial.printf_P(PSTR("Device %d: MAC: %02X:%02X:%02X:%02X:%02X:%02X, IP: %s\n"), i + 1,
+                            station.mac[0], station.mac[1], station.mac[2],
+                            station.mac[3], station.mac[4], station.mac[5],
+                            ip4addr_ntoa((const ip4_addr_t*)&station.ip));
+        }
+    } else {
+        Serial.println(F("Failed to get connected devices list."));
+    }
 }
 
 int getDevicesCount() {
-    // TODO
-    return 0;
+    wifi_sta_list_t wifi_sta_list;
+    tcpip_adapter_sta_list_t adapter_sta_list;
+
+    if (esp_wifi_ap_get_sta_list(&wifi_sta_list) == ESP_OK && tcpip_adapter_get_sta_list(&wifi_sta_list, &adapter_sta_list) == ESP_OK) {
+        return adapter_sta_list.num;
+    } else {
+        Serial.println(F("Failed to get connected devices count."));
+        return 0;
+    }
 }
