@@ -6,7 +6,7 @@ void setupButtons() {
     pinMode(PREV_BUTTON, INPUT_PULLUP);
 }
 
-void handleButtonPress(int buttonPin, bool &buttonHeld, unsigned long &buttonPressTime, void (*shortPressAction)(), void (*longPressAction)()) {
+void handleButtonPress(int buttonPin, bool &buttonHeld, unsigned long &buttonPressTime, std::function<void()> shortPressAction, std::function<void()> longPressAction) {
     if (digitalRead(buttonPin) == LOW) {
         if (!buttonHeld) {
             buttonPressTime = millis();
@@ -23,7 +23,7 @@ void handleButtonPress(int buttonPin, bool &buttonHeld, unsigned long &buttonPre
     }
 }
 
-void testButtons() {
+void monitorButtonInputs() {
     setupButtons();
     while (true) {
         if (digitalRead(PLAY_BUTTON) == LOW) {
@@ -37,6 +37,16 @@ void testButtons() {
         }
         delay(100);
     }
+}
+
+int getPinMode(int pin) {
+    pinMode(pin, INPUT_PULLUP);
+    return INPUT_PULLUP;
+}
+
+void testButtons() {
+    setupButtons();
+    monitorButtonInputs();
 }
 
 i2s_config_t amp_i2s_config = {

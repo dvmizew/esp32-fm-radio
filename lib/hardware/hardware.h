@@ -4,6 +4,7 @@
 #include <Wire.h>
 #include <Arduino.h>
 #include <driver/i2s.h>
+#include <functional>
 
 #define DEVICE_NAME "ESP32inatorul"
 
@@ -42,7 +43,9 @@ extern i2s_pin_config_t amp_config;
 
 // function prototypes
 void setupButtons();
-void handleButtonPress(int button, bool &buttonHeld, unsigned long &buttonPressTime, void (*longPressAction)(), void (*shortPressAction)());
+void handleButtonPress(int buttonPin, bool &buttonHeld, unsigned long &buttonPressTime, std::function<void()> shortPressAction, std::function<void()> longPressAction);
+void monitorButtonInputs();
+int getPinMode(int pin);
 void testButtons();
 void restartESP();
 void printI2CDevices();
