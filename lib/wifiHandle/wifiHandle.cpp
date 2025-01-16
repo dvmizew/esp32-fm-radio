@@ -46,7 +46,11 @@ void scanWiFiNetworks() {
             Serial.println(F("Failed to disconnect from the current network."));
             return;
         }
-        delay(1000); // allow some time for disconnection
+        unsigned long start = millis();
+        while (millis() - start < 1000) {
+            // wait for 1 second
+            vTaskDelay(pdMS_TO_TICKS(10));
+        }
     }
 
     int n = WiFi.scanNetworks();
@@ -71,7 +75,7 @@ void connectToWiFiNetwork(const char* ssid, const char* password) {
     const unsigned long timeout = 10000; // 10 seconds timeout
 
     while (WiFi.status() != WL_CONNECTED && customMillis() - start < timeout) {
-        delay(500);
+        vTaskDelay(pdMS_TO_TICKS(500));
         Serial.print(F("."));
     }
     if (WiFi.status() == WL_CONNECTED) {
@@ -92,8 +96,10 @@ void printWiFiConnectionStatus() {
 void addWiFiCredentials(WiFiCredentials* savedNetworks, uint8_t* savedNetworksCount, uint8_t* nextID, const char* ssid, const char* password) {
     if (*savedNetworksCount < MAX_NETWORKS) {
         savedNetworks[*savedNetworksCount].ID = (*nextID)++;
-        strncpy(savedNetworks[*savedNetworksCount].ssid, ssid, MAX_SSID_LEN);
-        strncpy(savedNetworks[*savedNetworksCount].password, password, MAX_PASS_LEN);
+        strncpy(savedNetworks[*savedNetworksCount].ssid, ssid, MAX_SSID_LEN - 1);
+        savedNetworks[*savedNetworksCount].ssid[MAX_SSID_LEN - 1] = '\0';
+        strncpy(savedNetworks[*savedNetworksCount].password, password, MAX_PASS_LEN - 1);
+        savedNetworks[*savedNetworksCount].password[MAX_PASS_LEN - 1] = '\0';
         (*savedNetworksCount)++;
         Serial.println(F("Credentials added."));
     } else {

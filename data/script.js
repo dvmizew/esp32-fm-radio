@@ -45,9 +45,13 @@ function fetchCurrentFrequency() {
 }
 
 function setFrequency() {
-    const frequency = document.getElementById('frequency-input').value;
-    if (!frequency) {
-        alert('Please enter a frequency.');
+    const frequency = parseFloat(document.getElementById('frequency-input').value);
+    if (isNaN(frequency)) {
+        alert('Please enter a valid frequency.');
+        return;
+    }
+    if (frequency < 87.5 || frequency > 108.0) {
+        alert('Please enter a frequency between 87.5 and 108.0 MHz.');
         return;
     }
     fetch(`/setFrequency?freq=${frequency}`)
@@ -56,6 +60,9 @@ function setFrequency() {
             console.log(data);
             fetchCurrentFrequency();
             fetchSignalStrength();
+        })
+        .catch(error => {
+            console.error('Error setting frequency:', error);
         });
 }
 
@@ -93,12 +100,13 @@ function fetchRadioStations() {
     fetch('/getRadioStations')
         .then(response => response.json())
         .then(data => {
-            const stationsList = document.getElementById('radio-stations-list');
-            stationsList.innerHTML = '';
+            const stationList = document.getElementById('station-list');
+            stationList.innerHTML = '';
             data.forEach(station => {
-                const listItem = document.createElement('li');
-                listItem.innerHTML = `${station.frequency} MHz <button onclick="setStationFrequency(${station.frequency})">Listen</button>`;
-                stationsList.appendChild(listItem);
+                const li = document.createElement('li');
+                li.innerText = `${station.name} (${station.frequency} MHz)`;
+                li.onclick = () => setStationFrequency(station.frequency);
+                stationList.appendChild(li);
             });
         });
 }
@@ -148,7 +156,7 @@ function fetchCurrentVolume() {
     fetch('/getVolume')
         .then(response => response.text())
         .then(data => {
-            document.getElementById('volume').innerText = data;
+            document.getElementById('bt-volume').innerText = data;
         });
 }
 
@@ -372,9 +380,15 @@ function fetchAPInfo() {
 
 function printConnectedDevices() {
     fetch('/printConnectedDevices')
-        .then(response => response.text())
+        .then(response => response.json())
         .then(data => {
-            document.getElementById('connected-devices').innerText = data;
+            const connectedDevicesElement = document.getElementById('connected-devices');
+            connectedDevicesElement.innerHTML = '';
+            data.forEach(device => {
+                const listItem = document.createElement('li');
+                listItem.innerText = `MAC: ${device.mac}, IP: ${device.ip}`;
+                connectedDevicesElement.appendChild(listItem);
+            });
         });
 }
 

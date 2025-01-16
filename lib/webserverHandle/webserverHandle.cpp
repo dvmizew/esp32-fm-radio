@@ -173,6 +173,10 @@ void setupWebServer() {
         request->send(200, "text/plain", "Playback toggled");
     });
 
+    server.on("/getVolume", HTTP_GET, [](AsyncWebServerRequest *request){
+        request->send(200, "text/plain", String(btAudioSink.get_volume()));
+    });
+
     server.on("/volumeUp", HTTP_GET, [](AsyncWebServerRequest *request){
         volumeUp();
         request->send(200, "text/plain", "Volume increased");
@@ -349,8 +353,23 @@ void setupWebServer() {
     });
 
     server.on("/printConnectedDevices", HTTP_GET, [](AsyncWebServerRequest *request){
-        printConnectedDevices();
-        request->send(200, "text/plain", "Connected devices printed to Serial");
+        wifi_sta_list_t wifi_sta_list;
+        tcpip_adapter_sta_list_t adapter_sta_list;
+        String json = "[";
+
+        if (esp_wifi_ap_get_sta_list(&wifi_sta_list) == ESP_OK && tcpip_adapter_get_sta_list(&wifi_sta_list, &adapter_sta_list) == ESP_OK) {
+            for (int i = 0; i < adapter_sta_list.num; i++) {
+                tcpip_adapter_sta_info_t station = adapter_sta_list.sta[i];
+                if (i > 0) json += ",";
+                json += "{";
+                json += "\"mac\":\"" + String(station.mac[0], HEX) + ":" + String(station.mac[1], HEX) + ":" + String(station.mac[2], HEX) + ":" +
+                        String(station.mac[3], HEX) + ":" + String(station.mac[4], HEX) + ":" + String(station.mac[5], HEX) + "\",";
+                json += "\"ip\":\"" + String(ip4addr_ntoa((const ip4_addr_t*)&station.ip)) + "\"";
+                json += "}";
+            }
+        }
+        json += "]";
+        request->send(200, "application/json", json);
     });
 
     server.on("/getDevicesCount", HTTP_GET, [](AsyncWebServerRequest *request){
