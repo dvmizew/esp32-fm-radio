@@ -12,23 +12,14 @@ I want to learn and create something I can use at home. Hopefully, others will a
 ### Functions
 1. Core functionality
 - FM Radio player
-- Play audio through Bluetooth speakers
-- Use as an external Bluetooth speaker / Wi-Fi Speaker
-- Support for internet radio stations
-- Support for Spotify Connect
-- Audio Equalizer
+- Use as an external Bluetooth speaker
 
 2. GUI
-- Search for FM channels and save them (also supports RDS - internet connection required)
+- Search for FM channels and save them
 - Visual volume control
 - Signal strength meter (for Radio, Wi-Fi and Bluetooth)
-- Clock and Alarm
-- Weather forecast
-- Timer and Stopwatch
-- Audio Visualizer (Winamp good old days)
 - Wi-Fi settings and network status
 - Bluetooth settings and status
-- Audio Equalizer settings
 - System debug information (RAM, CPU, etc.)
 - Web interface for remote control
 
@@ -61,14 +52,8 @@ I want to learn and create something I can use at home. Hopefully, others will a
         - SD -> GPIO33
         - VCC -> 5V
 - Multiple cables
-- 1x Joystick
-    - For navigating the GUI, changing the volume, play/pause and selecting options.
-    - Wiring:
-        - SW -> GPIO27
-        - VRx -> GPIO26
-        - VRy -> GPIO26
-        - SW -> GPIO32
-        - VCC -> 5V
+- 3x 10kΩ resistors
+- 3x buttons for media control
 
 ## Software Design
 For this project I used PlatformIO IDE.
@@ -79,11 +64,8 @@ The code is written in C++ and uses the Arduino framework.
 - TEA5767 library for FM radio
 - Adafruit SSD1306 for OLED display control
 - Adafruit GFX for graphics
-- LVGL for GUI design (follow this [instructions](https://docs.lvgl.io/8.3/get-started/platforms/arduino.html#configure-lvgl))
 - ESP32-A2DP for Bluetooth audio
-- arduino-audio-tools for audio processing
-- ArduinoJson for parsing JSON data from the internet
+- ArduinoJson for parsing JSON data
 - ESPASyncWebServer for handling web requests
-- SpotifyEsp32 for Spotify Connect
 - base64 for encoding and decoding data
 - freeRTOS for multitasking
